@@ -1,0 +1,26 @@
+gui_debian_packages_()
+{
+	UTILS_="gnome-disk-utility xarchiver"
+
+	## text edit
+	CODING_="geany mousepad"
+
+	## web browser and torrent
+	WEB_="qbittorrent"
+
+	## security
+	SECURITY_="keepass2 wireshark"
+
+	## office
+	OFFICE_="libreoffice gpicview evince"
+
+	## multimedia
+	MULTIMEDIA_="vlc audacity"
+
+	## gaming
+	GAMING_="hex-a-hop blastem dosbox"
+
+	nala install $UTILS_ $CODING_ $WEB_ $SECURITY_ $OFFICE_ $MULTIMEDIA_ $GAMING_
+
+}
+gui_debian_packages_

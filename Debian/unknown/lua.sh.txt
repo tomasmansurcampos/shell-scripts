@@ -1,0 +1,13 @@
+#!/bin/bash
+lua_()
+{
+	VERSION_=5.4.4
+	curl -R -O http://www.lua.org/ftp/lua-$VERSION_.tar.gz
+	tar zxf lua-$VERSION_.tar.gz
+	rm -rf lua-$VERSION_.tar.gz
+	mv lua-$VERSION_ /usr/local/src/
+	cd /usr/local/src/lua-$VERSION_
+	make all test
+	cd $HOME
+}
+lua_
