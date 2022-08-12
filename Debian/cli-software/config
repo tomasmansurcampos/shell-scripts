@@ -1,5 +1,13 @@
 #!/bin/bash
 
+check_root_()
+{
+	if [ "$EUID" -ne 0 ]
+	  then echo "Please run as root"
+	  exit
+	fi
+}
+
 check_arch_and_deb_release_()
 {
     if [ $(dpkg --print-architecture) = "amd64" ]; then
@@ -76,6 +84,8 @@ third_party_software_()
         bash $s
     done
 }
+
+check_root_
 
 check_arch_and_deb_release_
 
