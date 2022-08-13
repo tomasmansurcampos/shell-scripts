@@ -89,8 +89,6 @@ check_root_
 
 check_arch_and_deb_release_
 
-leave_
-
 if [ "$CONTINUE" = "0" ]; then
 		leave_
 fi
