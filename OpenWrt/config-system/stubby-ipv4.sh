@@ -6,7 +6,7 @@
 /etc/init.d/stubby stop
 
 uci set stubby.global.round_robin_upstreams="0"
-uci set stubby.global.tls_connection_retries="3"
+uci set stubby.global.tls_connection_retries="1"
 uci set stubby.global.tls_min_version="1.3"
 uci set stubby.global.tls_max_version="1.3"
 
