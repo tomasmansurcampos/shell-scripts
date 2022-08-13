@@ -1,4 +1,5 @@
 #!/bin/bash
+
 musl_compiler_()
 {
 	## https://musl.libc.org/
@@ -23,4 +24,5 @@ musl_compiler_()
     rm -rf musl/
     ln -sf /opt/software/musl/bin/musl-gcc /usr/bin/musl-gcc
 }
+
 musl_compiler_
