@@ -7,6 +7,7 @@ if [[ $EUID -eq 0 ]]; then
   apt install -y build-essential libncurses5-dev libncursesw5-dev \
   zlib1g-dev gawk git gettext libssl-dev xsltproc rsync wget unzip python3
   update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+  exit
 fi
 
 mkdir --parents ~/openwrt-snapshots
