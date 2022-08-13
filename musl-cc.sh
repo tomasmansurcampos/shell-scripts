@@ -4,7 +4,7 @@ musl_cc_()
 {
 	BASE_FOLDER_="~/musl-cc"
 	mkdir --parents $BASE_FOLDER_
-	curl -s musl.cc | grep mips | tee links
+	curl -s musl.cc | grep cross | tee links
 	cd $BASE_FOLDER_
 	for $l_ in links:
 	do
