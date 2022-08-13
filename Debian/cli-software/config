@@ -51,7 +51,7 @@ PollIntervalMinSec=32
 PollIntervalMaxSec=2048
 EOF
 
-    ## profile.d scripts to root user
+    ## profile.d scripts to root user at /home
 	cat << EOF >> /root/.bashrc
 for i in /etc/profile.d/*.sh ; do
     if [ -r "$i" ]; then
