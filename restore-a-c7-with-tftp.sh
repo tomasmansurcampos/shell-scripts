@@ -35,3 +35,12 @@ systemctl enable tftpd-hpa
 systemctl restart tftpd-hpa
 systemctl enable atftpd.service
 systemctl restart atftpd.service
+
+read -p "Press Enter to continue" </dev/tty
+
+rm /etc/netplan/01-netcfg.yaml 
+rm -rf /etc/default/tftp-hpa
+rm /srv/tftp/ArcherC7v5_tp_recovery.bin
+
+systemctl stop tftpd-hpa
+systemctl stop atftpd.service
