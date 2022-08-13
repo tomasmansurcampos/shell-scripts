@@ -6,7 +6,7 @@ cli_debian_packages_()
 	CRYPTOGRAPHY_="gpg gnupg gnupg2 gpg-agent gnupg-agent dirmngr openssl easy-rsa ca-certificates p7zip-full p7zip"
 
 	## network
-	NETWORK_="bmon socat whois curl wget mailutils dnsutils tcpdump ethtool netdata hydra ipcalc hping3 iperf3"
+	NETWORK_="netplan.io bmon socat whois curl wget mailutils dnsutils tcpdump ethtool netdata hydra ipcalc hping3 iperf3"
 
 	## cli web browsers
 	WEB_="w3m w3m-img lynx"
