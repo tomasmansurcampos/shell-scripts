@@ -4,7 +4,7 @@
 ## https://openwrt.org/toh/tp-link/archer_c7#installation_or_restore_with_tftp_-_linux
 
 CONFIG_FILE_=/etc/default/tftpd-hpa
-apt install -y tftpd-hpa
+apt install -y tftpd-hpa netplan.io
 cp $CONFIG_FILE_ $CONFIG_FILE_.original
 
 echo '# /etc/default/tftpd-hpa
