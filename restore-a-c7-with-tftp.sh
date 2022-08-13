@@ -18,6 +18,19 @@ mkdir --parents /srv/tftp
 mv $1 /srv/tftp/ArcherC7v5_tp_recovery.bin
 chown -R tftp:tftp /srv/tftp
 
+echo "network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eno1:
+      dhcp4: no
+      addresses:
+        - 192.168.0.66/24
+      routes:
+        - to: default
+          via: 192.168.0.1" >> /etc/netplan/01-netcfg.yaml
+
+netplan apply
 systemctl enable tftpd-hpa
 systemctl restart tftpd-hpa
 systemctl enable atftpd.service
