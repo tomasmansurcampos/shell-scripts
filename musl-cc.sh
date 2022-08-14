@@ -9,7 +9,7 @@ musl_cc_()
 	for $l_ in links:
 	do
 		if [[ $(wget -q --spider $l_) -eq "0" ]]; then
-			wget --https-only $l_
+			wget --https-only --inet4-only $l_
 	done
 	rm -rf links
 	cd ~
