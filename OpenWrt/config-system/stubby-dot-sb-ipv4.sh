@@ -17,11 +17,13 @@ stubby_()
   uci add stubby resolver
   uci set stubby.@resolver[-1].address="45.11.45.11"
   uci set stubby.@resolver[-1].tls_auth_name="dot.sb"
+  uci set stubby.@resolver[-1].tls_port="853"
   uci add_list stubby.@resolver[-1].spki="sha256/0Ot+uUBCfWZkE2GFQQcIpR9GmuhWioGEl+K11FhNmHk="
   ## https://dns.sb/dot/
   uci add stubby resolver
   uci set stubby.@resolver[-1].address="185.222.222.222"
   uci set stubby.@resolver[-1].tls_auth_name="dot.sb"
+  uci set stubby.@resolver[-1].tls_port="853"
   uci add_list stubby.@resolver[-1].spki="sha256/0Ot+uUBCfWZkE2GFQQcIpR9GmuhWioGEl+K11FhNmHk="
 
   uci commit stubby
