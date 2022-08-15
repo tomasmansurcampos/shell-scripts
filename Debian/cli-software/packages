@@ -9,7 +9,7 @@ cli_debian_packages_()
 	NETWORK_="netplan.io bmon socat whois curl wget mailutils dnsutils tcpdump ethtool netdata hydra ipcalc hping3 iperf3"
 
 	## cli web browsers
-	WEB_="w3m w3m-img lynx"
+	WEB_="googler w3m w3m-img lynx"
 
 	## Dev and C stuffs
 	LUA_VERSION_=5.4
