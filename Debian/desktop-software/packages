@@ -15,7 +15,7 @@ gui_debian_packages_()
 	OFFICE_="libreoffice gpicview evince"
 
 	## multimedia
-	MULTIMEDIA_="vlc audacity"
+	MULTIMEDIA_="vlc audacity kdenlive gimp"
 
 	## gaming
 	GAMING_="hex-a-hop blastem dosbox"
