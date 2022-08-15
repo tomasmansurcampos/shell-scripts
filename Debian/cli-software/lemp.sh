@@ -6,7 +6,6 @@ nginx_()
 	APT_PINNING_FILE=/etc/apt/preferences.d/99nginx
 	SIGNING_KEY_FILE=/etc/apt/trusted.gpg.d/nginx-archive-keyring.gpg
 	apt install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring
-	echo "## https://nginx.org/en/linux_packages.html#Debian" > $SOURCE_FILE
 	echo -e "deb\t[arch=$(dpkg --print-architecture) signed-by=$SIGNING_KEY_FILE] http://nginx.org/packages/mainline/debian $(lsb_release -sc) nginx" > $SOURCE_FILE
 	curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | tee $SIGNING_KEY_FILE >/dev/null
 	gpg --dry-run --quiet --import --import-options import-show $SIGNING_KEY_FILE
