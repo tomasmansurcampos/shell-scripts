@@ -2,7 +2,7 @@
 ## https://nmap.org/book/inst-source.html
 nmap_()
 {
-	NMAP_VERSION_=7.92
+	NMAP_VERSION_=7.93
 	PWD_=$(pwd)
 	DIR_="/usr/local/src/nmap*"
 	if [[ $(wget -q --spider https://nmap.org/dist/nmap-$NMAP_VERSION_.tar.bz2) -eq "0" ]]; then
