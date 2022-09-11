@@ -1,6 +1,6 @@
 cli_debian_packages_()
 {
-	TOOLS_="e2fsprogs ascii man-db neofetch lsb-release htop psmisc lm-sensors ffmpeg john cowsay fortunes flex locales-all texinfo texlive"
+	TOOLS_="jq e2fsprogs ascii man-db neofetch lsb-release htop psmisc lm-sensors ffmpeg john cowsay fortunes flex locales-all texinfo texlive"
 
 	## cryptography
 	CRYPTOGRAPHY_="gpg gnupg gnupg2 gpg-agent gnupg-agent dirmngr openssl easy-rsa ca-certificates p7zip-full p7zip"
