@@ -44,8 +44,8 @@ initial_config_()
     cp $FILE_ $FILE_.original
     cat << EOF > $FILE_
 [Time]
-NTP=time.google.com
-FallbackNTP=time1.google.com time2.google.com time3.google.com time4.google.com
+NTP=time.cloudflare.com
+FallbackNTP=
 RootDistanceMaxSec=5
 PollIntervalMinSec=32
 PollIntervalMaxSec=1024
