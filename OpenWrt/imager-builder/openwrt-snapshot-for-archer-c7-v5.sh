@@ -15,6 +15,9 @@ rm -rf ~/openwrt-snapshots/archer-c7-v5
 
 if [[ $(wget -q --spider https://downloads.openwrt.org/snapshots/targets/ath79/generic/openwrt-imagebuilder-ath79-generic.Linux-x86_64.tar.xz) -eq "0" ]]; then
     wget --https-only --inet4-only https://downloads.openwrt.org/snapshots/targets/ath79/generic/openwrt-imagebuilder-ath79-generic.Linux-x86_64.tar.xz
+    if [ $? -nq 0 ]; then
+      exit
+    fi
     tar -J -x -f openwrt-imagebuilder-ath79-generic.Linux-x86_64.tar.xz
     rm -rf openwrt-imagebuilder-ath79-generic.Linux-x86_64.tar.xz
     cd openwrt-imagebuilder-ath79-generic.Linux-x86_64/
