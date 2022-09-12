@@ -7,6 +7,9 @@ cli_debian_packages_()
 
 	## network
 	NETWORK_="netplan.io bmon socat whois curl wget mailutils dnsutils tcpdump ethtool netdata hydra ipcalc hping3 iperf3"
+	
+	## firmware
+	FIRMWARE_="firmware-atheros"
 
 	## cli web browsers
 	WEB_="googler w3m w3m-img lynx"
@@ -19,7 +22,7 @@ cli_debian_packages_()
 
 	## All
 	apt update
-	apt install -y $TOOLS_ $CRYPTOGRAPHY_ $NETWORK_ $WEB_ $DEV_
+	apt install -y $TOOLS_ $CRYPTOGRAPHY_ $NETWORK_ $WEB_ $DEV_ $FIRMWARE_
 
 	## python
 	update-alternatives --install /usr/bin/python python /usr/bin/python$PYTHON_VERSION_ 1
