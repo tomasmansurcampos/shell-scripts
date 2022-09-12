@@ -85,6 +85,25 @@ third_party_software_()
     done
 }
 
+nala_()
+{
+	echo "deb http://deb.volian.org/volian/ scar main" | sudo tee /etc/apt/sources.list.d/volian-archive-scar-unstable.list; wget -qO - https://deb.volian.org/volian/scar.key | tee /etc/apt/trusted.gpg.d/volian-archive-scar-unstable.gpg
+	apt update
+	apt install -y nala-legacy
+	echo "apt() {
+  command nala "$@"
+}
+sudo() {
+  if [ "$1" = "apt" ]; then
+    shift
+    command sudo nala "$@"
+  else
+    command sudo "$@"
+  fi
+}" >> /root/.bashrc
+	source /root/.bashrc
+}
+
 check_root_
 
 check_arch_and_deb_release_
