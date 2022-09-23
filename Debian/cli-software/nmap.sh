@@ -13,14 +13,14 @@ nmap_()
 		cd /usr/local/src/
 		rm -rf /usr/local/src/nmap*
 		apt update
-		apt install -y gcc g++ openssl libssl-dev build-essential make liblua5.4-dev
+		apt install -y gcc g++ openssl libssl-dev build-essential make
 		cd $PWD_
 		/usr/bin/wget --https-only https://nmap.org/dist/nmap-$NMAP_VERSION_.tar.bz2
 		bzip2 -cd ./nmap-$NMAP_VERSION_.tar.bz2 | tar xf -
 		mv nmap-$NMAP_VERSION_ /usr/local/src/
 		rm -rf nmap-$NMAP_VERSION_.tar.bz2
 		cd /usr/local/src/nmap-$NMAP_VERSION_
-		./configure --config-cache --without-ndiff --without-nping --without-ncat --without-zenmap --with-liblua=/usr/include/lua5.4
+		./configure --config-cache --without-ndiff --without-nping --without-ncat --without-zenmap --with-liblua=included
 		make -j $(expr $(nproc) - 1)
 		make install
 	else
