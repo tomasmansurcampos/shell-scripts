@@ -20,7 +20,7 @@ nmap_()
 		mv nmap-$NMAP_VERSION_ /usr/local/src/
 		rm -rf nmap-$NMAP_VERSION_.tar.bz2
 		cd /usr/local/src/nmap-$NMAP_VERSION_
-		./configure --without-zenmap
+		./configure --without-ndiff --without-nping --without-ncat --without-zenmap --without-liblua
 		make -j $(expr $(nproc) - 1)
 		make install
 	else
