@@ -12,7 +12,7 @@ nmap_()
 		fi
 		cd /usr/local/src/
 		rm -rf /usr/local/src/nmap*
-		apt --purge autoremove -y nmap* zenmap* netcat*
+		apt --purge autoremove -y nmap* netcat*
 		apt update
 		apt install -y gcc g++ openssl libssl-dev build-essential make
 		cd $PWD_
