@@ -14,7 +14,8 @@ nmap_()
 		rm -rf /usr/local/src/nmap*
 		apt update
 		apt install -y gcc g++ openssl libssl-dev build-essential make
-		wget -q https://nmap.org/dist/nmap-$NMAP_VERSION_.tar.bz2
+		cd $PWD_
+		/usr/bin/wget --https-only https://nmap.org/dist/nmap-$NMAP_VERSION_.tar.bz2
 		bzip2 -cd ./nmap-$NMAP_VERSION_.tar.bz2 | tar xf
 		mv nmap-$NMAP_VERSION_ /usr/local/src/
 		rm -rf nmap-$NMAP_VERSION_.tar.bz2
