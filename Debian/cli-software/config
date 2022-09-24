@@ -39,6 +39,8 @@ initial_config_()
     echo "export PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin" >> /root/.bashrc
     source /root/.bashrc
     
+    mkdir --parents /opt/software
+    
     ## ntp client configuration
     FILE_=/etc/systemd/timesyncd.conf
     cp $FILE_ $FILE_.original
@@ -85,33 +87,7 @@ third_party_software_()
     done
 }
 
-nala_()
-{
-	echo "deb http://deb.volian.org/volian/ scar main" | sudo tee /etc/apt/sources.list.d/volian-archive-scar-unstable.list; wget -qO - https://deb.volian.org/volian/scar.key | tee /etc/apt/trusted.gpg.d/volian-archive-scar-unstable.gpg
-	apt update
-	apt install -y nala-legacy
-	echo "apt() {
-  command nala "$@"
-}
-sudo() {
-  if [ "$1" = "apt" ]; then
-    shift
-    command sudo nala "$@"
-  else
-    command sudo "$@"
-  fi
-}" >> /root/.bashrc
-	source /root/.bashrc
-}
-
 check_root_
-
-check_arch_and_deb_release_
-
-if [ "$CONTINUE" = "0" ]; then
-		leave_
-fi
-
 
 initial_config_
 
