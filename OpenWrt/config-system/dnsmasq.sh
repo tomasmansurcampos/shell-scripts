@@ -2,6 +2,8 @@
 
 /etc/init.d/dnsmasq stop
 
+uci set dhcp.lan.dhcpv6=disabled
+uci set dhcp.lan.ra=disabled
 uci set dhcp.@dnsmasq[0].noresolv="1"
 uci set dhcp.@dnsmasq[0].localuse="1"
 uci set dhcp.@dnsmasq[0].cachesize="900"
