@@ -18,7 +18,7 @@ cli_debian_packages_()
 	LUA_VERSION_=5.4
 	PYTHON_VERSION_=3
 	PYTHON_="python$PYTHON_VERSION_ python$PYTHON_VERSION_-venv python$PYTHON_VERSION_-pip"
-	DEV_="gcc g++ gdb make cmake lua$LUA_VERSION_ perl openjdk-17-jdk rustc binutils git build-essential $PYTHON_ libpcap-dev libssl-dev manpages-dev libsystemd-dev zlib1g-dev"
+	DEV_="gcc g++ gdb make cmake lua$LUA_VERSION_ mono-complete perl openjdk-17-jdk rustc binutils git build-essential $PYTHON_ libpcap-dev libssl-dev manpages-dev libsystemd-dev zlib1g-dev"
 
 	## All
 	apt update
@@ -45,7 +45,10 @@ EOF
 	update-alternatives --config javac
 	
 	## services to config
-	systemctl stop netdata && systemctl disable netdata
+	systemctl stop netdata
+	systemctl disable netdata
+	systemctl stop mono-xsp4
+	systemctl disable mono-xsp4
 
 }
 
