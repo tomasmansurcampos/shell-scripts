@@ -1,6 +1,6 @@
 gui_debian_packages_()
 {
-	UTILS_="gnome-disk-utility xarchiver"
+	UTILS_="gnome-disk-utility xarchiver simplescreenrecorder"
 
 	## text edit
 	CODING_="geany mousepad"
@@ -9,18 +9,18 @@ gui_debian_packages_()
 	WEB_="qbittorrent"
 
 	## security
-	SECURITY_="keepass2 wireshark"
+	SECURITY_="wireshark"
 
 	## office
-	OFFICE_="libreoffice gpicview evince"
+	OFFICE_="libreoffice ristretto atril"
 
 	## multimedia
-	MULTIMEDIA_="vlc audacity mplayer-gui gimp"
+	MULTIMEDIA_="vlc audacity asunder xfburn gimp"
 
 	## gaming
 	GAMING_="hex-a-hop blastem dosbox"
 
-	nala install $UTILS_ $CODING_ $WEB_ $SECURITY_ $OFFICE_ $MULTIMEDIA_ $GAMING_
+	apt install -y $UTILS_ $CODING_ $WEB_ $SECURITY_ $OFFICE_ $MULTIMEDIA_ $GAMING_
 
 }
 gui_debian_packages_
