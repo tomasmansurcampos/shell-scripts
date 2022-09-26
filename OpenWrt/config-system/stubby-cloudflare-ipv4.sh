@@ -13,6 +13,7 @@ stubby_()
   uci set stubby.global.tls_connection_retries="1"
   uci set stubby.global.tls_min_version="1.3"
   uci set stubby.global.tls_max_version="1.3"
+  uci set stubby.global.idle_timeout='9000' ## (NOTE: recommend reducing idle_timeout to 9000 if using Cloudflare)
 
   while uci -q delete stubby.@resolver[0]; do :; done
   uci add stubby resolver
