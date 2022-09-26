@@ -1,9 +1,9 @@
 gui_debian_packages_()
 {
-	UTILS_="gnome-disk-utility xarchiver simplescreenrecorder"
+	UTILS_="gnome-disk-utility xarchiver"
 
 	## text edit
-	CODING_="geany mousepad"
+	CODING_="mousepad"
 
 	## web browser and torrent
 	WEB_="qbittorrent"
@@ -15,12 +15,13 @@ gui_debian_packages_()
 	OFFICE_="libreoffice ristretto atril"
 
 	## multimedia
-	MULTIMEDIA_="vlc audacity asunder xfburn gimp"
+	MULTIMEDIA_="vlc audacity asunder xfburn gimp simplescreenrecorder"
 
 	## gaming
 	GAMING_="hex-a-hop blastem dosbox"
 
 	apt install -y $UTILS_ $CODING_ $WEB_ $SECURITY_ $OFFICE_ $MULTIMEDIA_ $GAMING_
+	apt install --no-recommends -y kdenlive ## this way avoids KDE stuff installation.
 
 }
 gui_debian_packages_
