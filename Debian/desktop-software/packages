@@ -6,10 +6,10 @@ gui_debian_packages_()
 	CODING_="mousepad"
 
 	## web browser and torrent
-	WEB_="qbittorrent"
+	WEB_="firefox-esr qbittorrent"
 
 	## security
-	SECURITY_="wireshark"
+	SECURITY_="keepass2 wireshark"
 
 	## office
 	OFFICE_="libreoffice ristretto atril"
