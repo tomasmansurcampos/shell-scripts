@@ -46,7 +46,7 @@ initial_config_()
     cp $FILE_ $FILE_.original
     cat << EOF > $FILE_
 [Time]
-NTP=time.cloudflare.com
+NTP=pool.ntp.org
 FallbackNTP=
 RootDistanceMaxSec=5
 PollIntervalMinSec=32
