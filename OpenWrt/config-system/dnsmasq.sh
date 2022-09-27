@@ -8,6 +8,7 @@ uci set dhcp.lan.ra=disabled
 /etc/init.d/odhcpd disable
 /etc/init.d/odhcpd stop
 
+uci set dhcp.@dnsmasq[0].domain=''
 uci set dhcp.@dnsmasq[0].noresolv="1"
 uci set dhcp.@dnsmasq[0].localuse="1"
 uci set dhcp.@dnsmasq[0].cachesize="0"
