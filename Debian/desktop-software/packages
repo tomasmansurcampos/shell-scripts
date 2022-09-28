@@ -1,6 +1,6 @@
 gui_debian_packages_()
 {
-	UTILS_="gnome-disk-utility hollywood xarchiver"
+	UTILS_="blueman gnome-disk-utility hollywood xarchiver"
 
 	## text edit
 	CODING_="mousepad"
