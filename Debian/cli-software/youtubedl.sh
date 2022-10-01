@@ -3,7 +3,6 @@ youtube_dl_()
 	## https://youtube-dl.org/
 	BASE_FOLDER_=$HOME
 	BINARY_FILE_=$BASE_FOLDER_/.local/share/youtube-dl
-	mkdir --parents $BASE_FOLDER_
 	rm -rf $BINARY_FILE_
 	/usr/bin/wget --https-only https://yt-dl.org/downloads/latest/youtube-dl -qO $BINARY_FILE_
 	ln -sf $BINARY_FILE_ /usr/local/bin/youtube-dl
