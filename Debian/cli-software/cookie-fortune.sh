@@ -7,7 +7,7 @@ cookie_fortune_()
 #!/bin/bash
 main_()
 {
-    CHARACTER_=$(ls /usr/share/cowsay/cows/ | shuf -n 1)
+    CHARACTER_=\$(ls /usr/share/cowsay/cows/ | shuf -n 1)
     fortune -s | cowsay -f \$CHARACTER_
 }
 main_
