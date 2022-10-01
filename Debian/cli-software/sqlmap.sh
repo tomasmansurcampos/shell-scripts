@@ -1,11 +1,12 @@
 sqlmap_()
 {
 	## https://github.com/sqlmapproject/sqlmap
-	BASE_FOLDER_=/opt/software
+	BASE_FOLDER_=/usr/local/share
 	SQLMAP_FOLDER_=$BASE_FOLDER_/sqlmap-dev
 	mkdir --parents $BASE_FOLDER_
 	apt -y install git
 	git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git $SQLMAP_FOLDER_
-	echo "alias sqlmap='python /opt/software/sqlmap-dev/sqlmap.py -o --beep --force-ssl --mobile --smart'" >> /etc/profile.d/command_alias.sh
+	ln -sf $BASE_FOLDER_/sqlmap-dev/sqlmap.py /usr/local/bin/sqlmap
+	echo "alias sqlmap='sqlmap -o --beep --force-ssl --mobile --smart'" >> /etc/profile.d/command_alias.sh
 }
 sqlmap_
