@@ -15,7 +15,7 @@ gui_debian_packages_()
 	OFFICE_="libreoffice ristretto atril"
 
 	## multimedia
-	MULTIMEDIA_="vlc clementine audacity asunder xfburn gimp simplescreenrecorder"
+	MULTIMEDIA_="vlc clementine audacity sonic-visualiser asunder xfburn gimp simplescreenrecorder"
 
 	## gaming
 	GAMING_="hex-a-hop blastem dosbox"
