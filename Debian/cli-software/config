@@ -56,8 +56,8 @@ EOF
     ## profile.d scripts to root user at /home
 	cat << EOF >> /root/.bashrc
 for i in /etc/profile.d/*.sh ; do
-    if [ -r "$i" ]; then
-        . $i
+    if [ -r "\$i" ]; then
+        . \$i
     fi
 done
 EOF
@@ -67,8 +67,8 @@ EOF
 for f in $(ls /home/); do
     cat << EOF >> /home/$f/.bashrc
 for i in /etc/profile.d/*.sh ; do
-    if [ -r "$i" ]; then
-        . $i
+    if [ -r "\$i" ]; then
+        . \$i
     fi
 done
 EOF
