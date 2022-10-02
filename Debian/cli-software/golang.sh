@@ -6,7 +6,7 @@ golang_bin_()
     if wget --spider $URL_ 2>/dev/null; then
         wget --https-only $URL_
         rm -rf /usr/local/go && tar -C /usr/local -xzf go$VERSION_.linux-$(dpkg --print-architecture).tar.gz
-        cat << EOF > /etc/profile.d/go.sh
+        cat << EOF > /etc/profile.d/user/go.sh
 #!/bin/bash
 export PATH=$PATH:/usr/local/go/bin
 EOF
