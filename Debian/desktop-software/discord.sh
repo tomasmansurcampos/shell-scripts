@@ -2,11 +2,10 @@ discord_()
 {
 	## https://linuxconfig.org/how-to-install-discord-on-linux
 	## https://itsfoss.com/install-discord-linux/
-	BASE_FOLDER_=/opt/software
-	wget --https-only -qO discord.tar.gz "https://discord.com/api/download?platform=linux&format=tar.gz"
+	BASE_FOLDER_=/usr/local
+	wget --https-only -O discord.tar.gz "https://discord.com/api/download?platform=linux&format=tar.gz"
 	tar xf discord.tar.gz
 	rm -rf discord.tar.gz
-	mkdir --parents $BASE_FOLDER_
 	mv -f Discord/ $BASE_FOLDER_
 	ln -sf $BASE_FOLDER_/Discord/Discord /usr/bin/discord
 	ln -sf $BASE_FOLDER_/Discord/discord.png /usr/share/icons/hicolor/256x256/apps/discord.png
@@ -20,6 +19,6 @@ Icon=discord
 Type=Application
 Categories=Network;InstantMessaging;" > /usr/share/applications/discord.desktop
 	gtk-update-icon-cache -f /usr/share/icons/hicolor
-	chown -R user:user $BASE_FOLDER_
+	chown -R $1:$1 $BASE_FOLDER_
 }
 discord_
