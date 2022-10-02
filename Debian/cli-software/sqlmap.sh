@@ -1,7 +1,7 @@
 sqlmap_()
 {
 	## https://github.com/sqlmapproject/sqlmap
-	BASE_FOLDER_=/usr/local/share
+	BASE_FOLDER_=/usr/local
 	SQLMAP_FOLDER_=$BASE_FOLDER_/sqlmap-dev
 	apt -y install git
 	git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git $SQLMAP_FOLDER_
