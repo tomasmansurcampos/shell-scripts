@@ -74,9 +74,11 @@ done
 EOF
 done
 
-	## securing .bashrc files
+	## securing .bashrc and .profile files
 	chown root:root /home/*/.bashrc
 	chmod 755 /home/*/.bashrc
+	chown root:root /home/*/.profile
+	chmod 755 /home/*/.profile
 }
 
 debian_packages_()
