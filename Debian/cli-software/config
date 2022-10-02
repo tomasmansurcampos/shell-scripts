@@ -61,7 +61,7 @@ for i in /etc/profile.d/*.sh ; do
     fi
 done
 EOF
-    source /root/.bashrc
+	source /root/.bashrc
 
     ## profile.d scripts to every non root user
 for f in $(ls /home/); do
@@ -73,6 +73,10 @@ for i in /etc/profile.d/*.sh ; do
 done
 EOF
 done
+
+	## securing .bashrc files
+	chown root:root /home/*/.bashrc
+	chmod 755 /home/*/.bashrc
 }
 
 debian_packages_()
