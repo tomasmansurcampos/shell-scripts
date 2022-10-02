@@ -8,6 +8,6 @@ youtube_dl_()
 	ln -sf $BINARY_FILE_ /usr/local/bin/youtube-dl
 	chmod +x $BINARY_FILE_
 	echo "alias youtube-dl='youtube-dl --verbose'
-alias youtube-dl-tor='youtube-dl --verbose --proxy socks5://127.0.0.1:9050'" >> /etc/profile.d/command_alias.sh
+alias youtube-dl-tor='youtube-dl --verbose --proxy socks5://127.0.0.1:9050'" >> /etc/profile.d/user/command_alias.sh
 }
 youtube_dl_
