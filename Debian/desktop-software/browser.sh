@@ -13,7 +13,7 @@ firefox_stable_()
 	## differs from the Official Firefox Website https://www.mozilla.org/en-US/firefox/all/#product-desktop-release
 	## from product=firefox-latest to product=firefox-latest-ssl...
 	## i follow the link that points https://www.mozilla.org/ not https://ftp.mozilla.org/pub/firefox/releases/latest/README.txt
-	BASE_FOLDER_=/usr/local/share
+	BASE_FOLDER_=/usr/local
 	apt update
 	apt install -y libdbus-glib-1-2
 	wget --https-only -O firefox.tar.bz2 "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US"
