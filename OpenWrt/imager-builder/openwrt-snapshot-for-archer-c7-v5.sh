@@ -5,7 +5,7 @@
 if [[ $EUID -eq 0 ]]; then
   apt update
   apt install -y build-essential libncurses5-dev libncursesw5-dev \
-  zlib1g-dev gawk git gettext libssl-dev xsltproc rsync wget unzip python3
+  zlib1g-dev gawk git gettext libssl-dev xsltproc rsync wget unzip python3 python3-distutils
   update-alternatives --install /usr/bin/python python /usr/bin/python3 1
   exit
 fi
