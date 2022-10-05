@@ -10,8 +10,8 @@ if [[ $EUID -eq 0 ]]; then
   exit
 fi
 
-mkdir --parents ~/openwrt-snapshots
-rm -rf ~/openwrt-snapshots/archer-c7-v5
+mkdir --parents ~/.openwrt-snapshots
+rm -rf ~/.openwrt-snapshots/archer-c7-v5
 
 if [[ $(wget -q --spider https://downloads.openwrt.org/snapshots/targets/ath79/generic/openwrt-imagebuilder-ath79-generic.Linux-x86_64.tar.xz) -eq "0" ]]; then
     wget --https-only --inet4-only https://downloads.openwrt.org/snapshots/targets/ath79/generic/openwrt-imagebuilder-ath79-generic.Linux-x86_64.tar.xz
@@ -23,7 +23,7 @@ if [[ $(wget -q --spider https://downloads.openwrt.org/snapshots/targets/ath79/g
     cd openwrt-imagebuilder-ath79-generic.Linux-x86_64/
     source ../../packages.sh
     PROFILE_="tplink_archer-c7-v5"
-    BIN_DIR_="~/openwrt-snapshots/archer-c7-v5"
+    BIN_DIR_="~/.openwrt-snapshots/archer-c7-v5"
     rm -rf $BIN_DIR_
     make -j $(expr $(nproc) - 1) image PROFILE=$PROFILE_ PACKAGES="$PACKAGES_BASIC_" BIN_DIR=$BIN_DIR_ 
     make clean
