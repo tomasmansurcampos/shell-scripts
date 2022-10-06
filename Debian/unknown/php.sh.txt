@@ -1,7 +1,0 @@
-php_()
-{
-	apt install -y php-fpm php-mysql
-	VERSION_=$(apt show php-fpm | awk '/Depends: /{print $2}')
-	systemctl stop $VERSION_.service
-	systemctl disable $VERSION_.service
-}
