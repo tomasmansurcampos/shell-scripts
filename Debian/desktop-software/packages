@@ -1,12 +1,12 @@
 gui_debian_packages_()
 {
-	UTILS_="blueman gnome-disk-utility hollywood xarchiver"
+	UTILS_="gnome-disk-utility hollywood xarchiver"
 
 	## text edit
 	CODING_="mousepad"
 
 	## web browser and torrent
-	WEB_="firefox-esr qbittorrent"
+	WEB_="qbittorrent"
 
 	## security
 	SECURITY_="keepass2 wireshark"
@@ -15,13 +15,12 @@ gui_debian_packages_()
 	OFFICE_="libreoffice ristretto atril"
 
 	## multimedia
-	MULTIMEDIA_="vlc clementine audacity sonic-visualiser asunder xfburn gimp simplescreenrecorder"
+	MULTIMEDIA_="mpv clementine audacity sonic-visualiser asunder xfburn gimp kdenlive simplescreenrecorder"
 
 	## gaming
 	GAMING_="hex-a-hop blastem dosbox"
 
-	apt install -y $UTILS_ $CODING_ $WEB_ $SECURITY_ $OFFICE_ $MULTIMEDIA_ $GAMING_
-	apt install --no-recommends -y kdenlive ## this way avoids KDE stuff installation.
+	apt install --no-install-recommends -y $UTILS_ $CODING_ $WEB_ $SECURITY_ $OFFICE_ $MULTIMEDIA_ $GAMING_
 
 }
 gui_debian_packages_
