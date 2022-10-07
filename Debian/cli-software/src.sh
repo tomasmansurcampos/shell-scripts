@@ -7,7 +7,6 @@ static_resolv_conf_()
 	echo "#!/bin/sh
 chattr -i /etc/resolv.conf
 echo 'nameserver 127.0.0.1' > /etc/resolv.conf
-#echo 'nameserver ::1' >> /etc/resolv.conf
 chattr +i /etc/resolv.conf" > $BASH_SCRIPT_FILE_
 	chmod +x $BASH_SCRIPT_FILE_
 	## systemd service:
