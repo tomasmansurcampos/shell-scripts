@@ -16,7 +16,7 @@ uci set dhcp.@dnsmasq[-1].proxydnssec=1
 uci -q delete dhcp.@dnsmasq[0].server
 uci -q delete dhcp.@dnsmasq[0].doh_backup_server
 uci add_list dhcp.@dnsmasq[0].server="127.0.0.1#5453"
-uci add_list dhcp.@dnsmasq[0].server="::1#5453"
+#uci add_list dhcp.@dnsmasq[0].server="::1#5453"
 
 uci commit dhcp
 /etc/init.d/dnsmasq start
