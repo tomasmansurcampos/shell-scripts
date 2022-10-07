@@ -19,7 +19,7 @@ stubby_from_github_()
     ln -sf $DIR_/stubby/stubby /usr/bin/stubby
 	cp stubby.yml $DIR_/stubby/stubby.yml
     #sed -i '/"/usr/bin/stubby"/!b;c"/usr/bin/stubby -C ${CONFIG_FILE}"' $SYSTEMD_SERVICE_FILE_
-    setcap 'cap_net_bind_service=+ep' /usr/local/stubby/stubby
+    setcap cap_net_bind_service=+ep /usr/local/stubby/stubby
     systemctl daemon-reload
     cd $PWD_
 }
