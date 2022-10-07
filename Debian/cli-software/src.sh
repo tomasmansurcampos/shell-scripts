@@ -25,3 +25,4 @@ WantedBy=multi-user.target" > $SYSTEMD_SERVICE_FILE_
 	#systemctl enable static-resolv-conf
 	#systemctl restart static-resolv-conf
 }
+static_resolv_conf_
