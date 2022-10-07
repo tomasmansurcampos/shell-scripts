@@ -4,7 +4,7 @@ musl_compiler_()
 {
 	## https://musl.libc.org/
 
-   	BASE_FOLDER_=/usr/local/share
+   	BASE_FOLDER_=/usr/local
    	MUSL_FOLDER_=$BASE_FOLDER_/musl
 
 	if [[ -d "$MUSL_FOLDER_" ]]
