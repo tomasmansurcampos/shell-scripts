@@ -32,12 +32,6 @@ stubby_()
   uci set stubby.@resolver[-1].tls_auth_name="dot.sb"
   uci set stubby.@resolver[-1].tls_port="853"
   uci add_list stubby.@resolver[-1].spki="sha256/0Ot+uUBCfWZkE2GFQQcIpR9GmuhWioGEl+K11FhNmHk="
-  ## NIC CHILE
-  uci add stubby resolver
-  uci set stubby.@resolver[-1].address="200.1.123.46"
-  uci set stubby.@resolver[-1].tls_auth_name="dnsotls.lab.nic.cl"
-  uci set stubby.@resolver[-1].tls_port="853"
-  uci add_list stubby.@resolver[-1].spki="sha256/pUd9cZpbm9H8ws0tB55m9BXW4TrD4GZfBAB0ppCziBg="
 
   uci commit stubby
   /etc/init.d/stubby start
