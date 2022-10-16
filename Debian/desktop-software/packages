@@ -6,7 +6,7 @@ gui_debian_packages_()
 	CODING_="mousepad"
 
 	## web browser and torrent
-	WEB_="firefox-esr qbittorrent"
+	WEB_="qbittorrent"
 
 	## security
 	SECURITY_="keepass2 wireshark"
