@@ -1,9 +1,0 @@
-#!/bin/bash
-public_ip_()
-{
-	IPV4_=$(dig +short myip.opendns.com @resolver1.opendns.com A)
-	IPV6_=$(dig +short myip.opendns.com @resolver1.opendns.com AAAA)
-	echo "IPv4: $IPV4_"
-	echo "IPv6: $IPV6_"
-}
-public_ip_
