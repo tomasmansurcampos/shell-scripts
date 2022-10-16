@@ -1,10 +1,11 @@
 emacs_()
 {
+	USER_="user"
 	## https://www.emacswiki.org/emacs/IndentingC
 	apt update
 	apt install --no-install-recommends -y emacs-nox emacs-el ## this way avoids exim4 installation.
-	if id "user" &>/dev/null; then
-		CONFIG_FOLDER_=/home/user/.emacs.d
+	if id $USER_ &>/dev/null; then
+		CONFIG_FOLDER_=/home/$USER_/.emacs.d
 	elif id "root" &>/dev/null; then
 		CONFIG_FOLDER_=/root/.emacs.d
 	fi
@@ -17,7 +18,7 @@ emacs_()
 	echo '(setq c-default-style "linux"
           c-basic-offset 4)' >> $FILE_CONFIG_
 	if id "user" &>/dev/null; then
-		chown -R user:user /home/user
+		chown -R $USER_:$USER_ /home/$USER_
 	fi
 }
 emacs_
