@@ -20,7 +20,7 @@ gui_debian_packages_()
 	## gaming
 	GAMING_="hex-a-hop blastem dosbox"
 
-	apt install --no-install-recommends -y $UTILS_ $CODING_ $WEB_ $SECURITY_ $OFFICE_ $MULTIMEDIA_ $GAMING_
+	/usr/bin/apt install --no-install-recommends -y $UTILS_ $CODING_ $WEB_ $SECURITY_ $OFFICE_ $MULTIMEDIA_ $GAMING_
 
 }
 gui_debian_packages_
