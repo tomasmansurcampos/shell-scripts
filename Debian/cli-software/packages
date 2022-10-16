@@ -20,8 +20,10 @@ cli_debian_packages_()
 	DEV_="gcc g++ gdb make cmake binutils git build-essential $PYTHON_ libpcap-dev libssl-dev manpages-dev libsystemd-dev zlib1g-dev"
 
 	## All
-	apt update
-	apt install -y $TOOLS_ $CRYPTOGRAPHY_ $NETWORK_ $WEB_ $DEV_ $FIRMWARE_
+	/usr/bin/apt autoclean
+	/usr/bin/apt clean
+	/usr/bin/apt update
+	/usr/bin/apt install -y $TOOLS_ $CRYPTOGRAPHY_ $NETWORK_ $WEB_ $DEV_ $FIRMWARE_
 
 	## python
 	update-alternatives --install /usr/bin/python python /usr/bin/python$PYTHON_VERSION_ 1
