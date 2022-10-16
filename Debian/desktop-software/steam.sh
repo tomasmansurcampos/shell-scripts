@@ -12,6 +12,8 @@ steam_()
 		rm $D_
 		## steam.deb adds some third part packages like steam-libs-*
 		## that why the next apt update comes.
+		apt autoclean
+		apt clean
 		apt update
 		## From repo.steampowered.com/steam/ this must be installed:
 		apt install -y libgl1-mesa-dri:amd64 libgl1-mesa-dri:i386 libgl1-mesa-glx:amd64 libgl1-mesa-glx:i386 steam-launcher
