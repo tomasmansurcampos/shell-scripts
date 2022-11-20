@@ -7,13 +7,15 @@ stubby_()
 
   /etc/init.d/stubby stop
 
+  uci -q delete stubby.global.listen_address
+  uci add_list stubby.global.listen_address='127.0.0.1@5453'
   uci set stubby.global.dns_transport='GETDNS_TRANSPORT_TLS'
   uci set stubby.global.tls_authentication='1'
   uci set stubby.global.round_robin_upstreams='1'
   uci set stubby.global.tls_connection_retries='6'
   uci set stubby.global.tls_min_version="1.3"
   uci set stubby.global.tls_max_version="1.3"
-  uci set stubby.global.idle_timeout='10000'
+  uci set stubby.global.idle_timeout='9000'
   uci set stubby.global.appdata_dir="/tmp/stubby"
   uci set stubby.global.dnssec_return_status="1"
 
