@@ -2,7 +2,7 @@
 
 ## wifi-device
 uci set wireless.radio$1.disabled='1'
-uci set wireless.radio$1.htmode='VHT20'
+uci set wireless.radio$1.htmode='VHT80'
 uci set wireless.radio$1.hwmode='11a'
 uci set wireless.radio$1.country='AR' ## Argentina.
 uci set wireless.radio$1.channel='auto'
