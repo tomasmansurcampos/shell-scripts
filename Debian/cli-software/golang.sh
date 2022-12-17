@@ -33,6 +33,7 @@ golang_bin_()
 
     if ! command -v /usr/local/go/bin/go &> /dev/null
     then
+        echo "Installing go language..."
         install_
     else
         if are_updated_
