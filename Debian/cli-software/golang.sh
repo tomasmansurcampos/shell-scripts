@@ -20,9 +20,9 @@ are_updated_()
     INSTALLED_VERSION_=$(go version | cut -d " " -f 3)
     INSTALLED_VERSION_=${INSTALLED_VERSION_:2}
     if [ "$(printf '%s\n' "$VERSION_" "$INSTALLED_VERSION_" | sort -V | head -n1)" = "$VERSION_" ]; then 
-        return 1
+        echo 1
     else
-        return 0
+        echo 0
     fi
 }
 
@@ -33,16 +33,19 @@ golang_bin_()
 
     if ! command -v /usr/local/go/bin/go &> /dev/null
     then
-        echo "Installing go language..."
+        echo -e "Installing go language..."
         install_
     else
-        if are_updated_
+        if ${are_updated_}
         then
-            echo "Latest go version is installed!"
+            echo -e "\nLatest go version is installed!"
         else
-            echo "Go language is not updated..."
+            echo -e "Go language is not updated..."
             echo "Installing latest version"
             install_
+        fi
     fi
 }
+
+apt install --no-install-recommends -y curl wget
 golang_bin_
