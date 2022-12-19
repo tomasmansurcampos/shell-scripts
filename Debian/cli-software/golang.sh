@@ -47,5 +47,11 @@ golang_bin_()
     fi
 }
 
+if [ "$EUID" -ne 0 ]
+    then echo "Please run as root"
+    exit
+fi
+
 apt install --no-install-recommends -y curl wget
+
 golang_bin_
