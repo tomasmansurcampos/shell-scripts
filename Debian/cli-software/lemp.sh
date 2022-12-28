@@ -43,7 +43,7 @@ php_sury_()
 	echo -e "deb\t[arch=$(dpkg --print-architecture) signed-by=$SIGNING_KEY_FILE_] http://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
 	apt update
 	apt install -y php-fpm php-mysql
-	PHP_VERSION_=$(apt show php-fpm | awk '/Depends: /{print $2}')
+	PHP_VERSION_=$(/usr/bin/apt show php-fpm | awk '/Depends: /{print $2}')
 	systemctl stop $PHP_VERSION_.service
 	systemctl disable $PHP_VERSION_.service
 }
