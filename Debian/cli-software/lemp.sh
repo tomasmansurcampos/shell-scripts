@@ -31,7 +31,7 @@ mariadb_()
 php_()
 {
 	apt install -y php-fpm php-mysql
-	PHP_VERSION_=$(apt show php-fpm | awk '/Depends: /{print $2}')
+	PHP_VERSION_=$(/usr/bin/apt show php-fpm | awk '/Depends: /{print $2}')
 	systemctl stop $PHP_VERSION_.service
 	systemctl disable $PHP_VERSION_.service
 }
