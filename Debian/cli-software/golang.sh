@@ -55,3 +55,6 @@ fi
 apt install --no-install-recommends -y curl wget
 
 golang_bin_
+
+cp $0 /sbin/go-installer
+chmod +x /sbin/go-installer
