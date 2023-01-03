@@ -1,6 +1,6 @@
 gui_debian_packages_()
 {
-	UTILS_="gnome-disk-utility hollywood xarchiver"
+	UTILS_="gnome-disk-utility hollywood xarchiver mono-complete" ## keepass2 needs mono-complete for plugins to work properly.
 
 	## text edit
 	CODING_="mousepad"
