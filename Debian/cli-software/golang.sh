@@ -19,7 +19,7 @@ are_updated_()
 {
     INSTALLED_VERSION_=$(go version | cut -d " " -f 3)
     INSTALLED_VERSION_=${INSTALLED_VERSION_:2}
-    if [ "$(printf '%s\n' "$VERSION_" "$INSTALLED_VERSION_" | sort -V | head -n1)" = "$VERSION_" ]; then 
+    if [ "$(printf '%s\n' "$INSTALLED_VERSION_" "$VERSION_" | sort -V | head -n1)" == "$VERSION_" ]; then
         echo 1
     else
         echo 0
@@ -36,7 +36,7 @@ golang_bin_()
         echo -e "Installing go language..."
         install_
     else
-        if ${are_updated_}
+        if [ ${are_updated_} ]
         then
             echo -e "\nLatest go version is installed!"
         else
