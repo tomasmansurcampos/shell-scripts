@@ -215,11 +215,6 @@ Icon=application-exit" > /usr/share/applications/telegram.desktop
 	apt install -y ./google-chrome-stable_current_amd64.deb
 	rm -rf ./google-chrome-stable_current_amd64.deb
 
-	### GOOGLE EARTH PRO
-	wget --inet4-only --https-only https://dl.google.com/dl/earth/client/current/google-earth-pro-stable_current_amd64.deb
-	apt install -y ./google-earth-pro-stable_current_amd64.deb
-	rm -rf ./google-earth-pro-stable_current_amd64.deb
-
 	### VISUAL STUDIO CODE
 	wget --inet4-only --https-only -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
 	install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
@@ -449,6 +444,11 @@ X-DBUS-ServiceName=
 X-DBUS-StartupType=none
 X-KDE-SubstituteUID=false
 X-KDE-Username=" > /usr/share/applications/ghidra.desktop
+
+	### GOOGLE EARTH PRO
+	wget --inet4-only --https-only https://dl.google.com/dl/earth/client/current/google-earth-pro-stable_current_amd64.deb
+	apt install -y ./google-earth-pro-stable_current_amd64.deb
+	rm -rf ./google-earth-pro-stable_current_amd64.deb
 
 	### VIRTUAL BOX
 	echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | tee /etc/apt/sources.list.d/vbox.list > /dev/null
