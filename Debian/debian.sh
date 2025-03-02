@@ -22,6 +22,7 @@ _flatpak()
 	flatpak install -y flathub org.keepassxc.KeePassXC
 	flatpak install -y flathub org.gnome.Boxes
 	flatpak install -y flathub io.github.peazip.PeaZip
+	flatpak install -y flathub org.telegram.desktop
 	flatpak install -y flathub com.discordapp.Discord
 	flatpak install -y flathub io.bassi.Amberol
 	flatpak install -y flathub com.spotify.Client
@@ -183,34 +184,6 @@ apt install -y ./fastfetch-linux-amd64.deb
 rm -rf ./fastfetch-linux-amd64.deb" > /usr/bin/fastfetch-update
 	chmod +x /usr/bin/fastfetch-update
 	bash /usr/bin/fastfetch-update
-
-	### TELEGRAM
-	wget --inet4-only --https-only https://telegram.org/dl/desktop/linux -O telegram.tar.xz
-	tar xf telegram.tar.xz
-	rm -rf telegram.tar.xz
-	mv Telegram /opt
-	echo "[Desktop Entry]
-Name=Telegram
-Comment=New era of messaging
-TryExec=/opt/Telegram/Telegram
-Exec=/opt/Telegram/Telegram -- %u
-Icon=telegram
-Terminal=false
-StartupWMClass=TelegramDesktop
-Type=Application
-Categories=Chat;Network;InstantMessaging;Qt;
-MimeType=x-scheme-handler/tg;x-scheme-handler/tonsite;
-Keywords=tg;chat;im;messaging;messenger;sms;tdesktop;
-Actions=quit;
-DBusActivatable=true
-SingleMainWindow=true
-X-GNOME-UsesNotifications=true
-X-GNOME-SingleWindow=true
-
-[Desktop Action quit]
-Exec=/opt/Telegram/Telegram -quit
-Name=Quit Telegram
-Icon=application-exit" > /usr/share/applications/telegram.desktop
 
 	### GOOGLE CHROME
 	wget --inet4-only --https-only https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
@@ -485,6 +458,34 @@ X-KDE-Username=" > /usr/share/applications/ghidra.desktop
 	apt install -y anydesk
 	systemctl stop anydesk.service
 	systemctl disable anydesk.service
+	
+	### TELEGRAM
+	wget --inet4-only --https-only https://telegram.org/dl/desktop/linux -O telegram.tar.xz
+	tar xf telegram.tar.xz
+	rm -rf telegram.tar.xz
+	mv Telegram /opt
+	echo "[Desktop Entry]
+Name=Telegram
+Comment=New era of messaging
+TryExec=/opt/Telegram/Telegram
+Exec=/opt/Telegram/Telegram -- %u
+Icon=telegram
+Terminal=false
+StartupWMClass=TelegramDesktop
+Type=Application
+Categories=Chat;Network;InstantMessaging;Qt;
+MimeType=x-scheme-handler/tg;x-scheme-handler/tonsite;
+Keywords=tg;chat;im;messaging;messenger;sms;tdesktop;
+Actions=quit;
+DBusActivatable=true
+SingleMainWindow=true
+X-GNOME-UsesNotifications=true
+X-GNOME-SingleWindow=true
+
+[Desktop Action quit]
+Exec=/opt/Telegram/Telegram -quit
+Name=Quit Telegram
+Icon=application-exit" > /usr/share/applications/telegram.desktop
 	
 	### FIREFOX
 	install -d -m 0755 /etc/apt/keyrings
