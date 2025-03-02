@@ -348,7 +348,7 @@ _others()
 	_SOURCE_CODE_=$(curl -s https://nmap.org/download | grep tar.bz2 | head -n 1 | cut -d " " -f 3)
 	if [[ `wget --inet4-only --https-only --server-response --spider https://nmap.org/dist/$_SOURCE_CODE_ 2>&1 | grep '200 OK'` ]]; then
 		apt purge -y nmap*
-		rm -rf /opt/nmap-suite
+		rm -rf /opt/nmap*
 		apt update
 		apt install -y python3-pip gcc g++ make liblua5.4-dev libssl-dev libssh2-1-dev libtool-bin
 		mkdir -p -v /opt/nmap-suite
