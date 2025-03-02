@@ -2,7 +2,7 @@
 
 _PACKAGES="nala flatpak bleachbit python-is-python3 rar unrar zip unzip p7zip-full p7zip-rar gnome-disk-utility ffmpeg flac audacity vlc sox spek gnupg git make binutils gcc g++"
 
-_UNDESIRED_PACKAGES="intel-microcode iucode-tool *nvidia* firmware-intel* intel-media-va-driver-non-free synaptic firefox-esr libreoffice-core libreoffice-common popularity-contest gnome-software-common gnome-boxes gnome-system-monitor rhythmbox transmission-common gnome-games malcontent gnome-games-app gnome-weather evolution qbittorrent qbittorrent-nox quodlibet parole exfalso yelp seahorse simple-scan gnome-clocks zutty gnome-characters debian-reference-common totem cheese gnome-sound-recorder gnome-connections gnome-music gnome-weather gnome-calculator gnome-calendar gnome-contacts gnome-maps gnome-tour"
+_UNDESIRED_PACKAGES="intel-microcode iucode-tool *nvidia* firmware-intel* intel-media-va-driver-non-free synaptic firefox-esr libreoffice-core libreoffice-common popularity-contest gnome-software-common gnome-boxes gnome-system-monitor rhythmbox transmission-common gnome-games malcontent gnome-games-app gnome-weather evolution qbittorrent qbittorrent-nox quodlibet parole exfalso yelp seahorse simple-scan gnome-clocks zutty gnome-characters debian-reference-common totem cheese gnome-sound-recorder gnome-connections gnome-music gnome-weather gnome-calculator gnome-calendar gnome-contacts gnome-maps gnome-text-editor gnome-tour"
 
 _flatpak()
 {
@@ -15,6 +15,7 @@ _flatpak()
 	flatpak install -y flathub io.github.thetumultuousunicornofdarkness.cpu-x
 	flatpak install -y flathub io.missioncenter.MissionCenter
 	flatpak install -y flathub org.mozilla.firefox #&& update-alternatives --set x-www-browser /var/lib/flatpak/exports/bin/org.mozilla.firefox
+	flatpak install -y flathub org.gnome.TextEditor
 	flatpak install -y flathub org.onlyoffice.desktopeditors
 	flatpak install -y flathub org.libreoffice.LibreOffice
 	flatpak install -y flathub org.keepassxc.KeePassXC
