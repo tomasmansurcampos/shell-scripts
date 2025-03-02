@@ -241,19 +241,6 @@ Icon=application-exit" > /usr/share/applications/telegram.desktop
 	chmod 755 /opt/yt-dlp
 	ln -sf /opt/yt-dlp /usr/bin/yt-dlp
 
-	### SQLMAP
-	apt purge -y sqlmap
-	rm -rf /opt/sqlmap*
-	git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git /opt/sqlmap-dev
-	ln -sf /opt/sqlmap-dev/sqlmap.py /usr/bin/sqlmap
-
-	### VENTOY
-	rm -rf /opt/ventoy*
-	wget --inet4-only --https-only $(curl --silent "https://api.github.com/repos/ventoy/Ventoy/releases/latest" | jq -r '(.assets[1].browser_download_url)') -O ventoy-linux.tar.gz
-	tar -xf ventoy-linux.tar.gz
-	rm -rf ventoy-linux.tar.gz
-	mv ventoy-* /opt/ventoy
-
 	mkdir -v -p /opt/songs
 	touch /opt/songs/SONG{001..101}.flac
 
@@ -343,6 +330,19 @@ _cookie_fortune
 
 _others()
 {
+	### SQLMAP
+	apt purge -y sqlmap
+	rm -rf /opt/sqlmap*
+	git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git /opt/sqlmap-dev
+	ln -sf /opt/sqlmap-dev/sqlmap.py /usr/bin/sqlmap
+
+	### VENTOY
+	rm -rf /opt/ventoy*
+	wget --inet4-only --https-only $(curl --silent "https://api.github.com/repos/ventoy/Ventoy/releases/latest" | jq -r '(.assets[1].browser_download_url)') -O ventoy-linux.tar.gz
+	tar -xf ventoy-linux.tar.gz
+	rm -rf ventoy-linux.tar.gz
+	mv ventoy-* /opt/ventoy
+
 	### NMAP
 	PWD_=$(pwd)
 	_SOURCE_CODE_=$(curl -s https://nmap.org/download | grep tar.bz2 | head -n 1 | cut -d " " -f 3)
