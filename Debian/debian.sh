@@ -14,7 +14,8 @@ _flatpak()
 	flatpak install -y flathub com.github.tchx84.Flatseal
 	flatpak install -y flathub io.github.thetumultuousunicornofdarkness.cpu-x
 	flatpak install -y flathub io.missioncenter.MissionCenter
-	flatpak install -y flathub org.mozilla.firefox #&& update-alternatives --set x-www-browser /var/lib/flatpak/exports/bin/org.mozilla.firefox
+	flatpak install -y flathub org.mozilla.firefox
+	update-alternatives --install /usr/bin/x-www-browser x-www-browser /var/lib/flatpak/exports/bin/org.mozilla.firefox 200 && update-alternatives --set x-www-browser /var/lib/flatpak/exports/bin/org.mozilla.firefox
 	flatpak install -y flathub org.gnome.TextEditor
 	flatpak install -y flathub org.onlyoffice.desktopeditors
 	flatpak install -y flathub org.libreoffice.LibreOffice
