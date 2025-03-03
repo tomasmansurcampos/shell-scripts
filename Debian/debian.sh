@@ -17,6 +17,7 @@ _flatpak()
 	flatpak install -y flathub org.mozilla.firefox
 	update-alternatives --install /usr/bin/x-www-browser x-www-browser /var/lib/flatpak/exports/bin/org.mozilla.firefox 200 && update-alternatives --set x-www-browser /var/lib/flatpak/exports/bin/org.mozilla.firefox
 	flatpak install -y flathub org.gnome.TextEditor
+	flatpak install -y flathub com.vscodium.codium
 	flatpak install -y flathub org.onlyoffice.desktopeditors
 	flatpak install -y flathub org.libreoffice.LibreOffice
 	flatpak install -y flathub org.keepassxc.KeePassXC
@@ -190,14 +191,6 @@ rm -rf ./fastfetch-linux-amd64.deb" > /usr/bin/fastfetch-update
 	apt install -y ./google-chrome-stable_current_amd64.deb
 	rm -rf ./google-chrome-stable_current_amd64.deb
 
-	### VISUAL STUDIO CODE
-	wget --inet4-only --https-only -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-	install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
-	rm -f packages.microsoft.gpg
-	echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | tee /etc/apt/sources.list.d/vscode.list > /dev/null
-	apt update
-	apt install -y code
-
 	### STEAM
 	dpkg --add-architecture i386
 	apt update
@@ -215,7 +208,7 @@ rm -rf ./fastfetch-linux-amd64.deb" > /usr/bin/fastfetch-update
 	mkdir -v -p /opt/songs
 	touch /opt/songs/SONG{001..101}.flac
 
-	chown tomas:tomas -R /opt
+	#chown tomas:tomas -R /opt
 
 	### OFFICIAL DEBIAN PACKAGES
 	apt update
@@ -424,6 +417,7 @@ X-KDE-Username=" > /usr/share/applications/ghidra.desktop
 	wget --inet4-only --https-only https://dl.google.com/dl/earth/client/current/google-earth-pro-stable_current_amd64.deb
 	apt install -y ./google-earth-pro-stable_current_amd64.deb
 	rm -rf ./google-earth-pro-stable_current_amd64.deb
+	cp /opt/google/earth/pro/google-earth-pro.desktop /usr/share/applications/google-earth-pro.desktop
 
 	### VIRTUAL BOX
 	echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | tee /etc/apt/sources.list.d/vbox.list > /dev/null
