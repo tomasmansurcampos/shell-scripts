@@ -2,7 +2,7 @@
 
 _PACKAGES="nala flatpak bleachbit python-is-python3 rar unrar zip unzip p7zip-full p7zip-rar gnome-disk-utility ffmpeg flac audacity vlc sox spek gnupg git make binutils gcc g++"
 
-_UNDESIRED_PACKAGES="intel-microcode iucode-tool *nvidia* firmware-intel* intel-media-va-driver-non-free synaptic firefox-esr libreoffice-core libreoffice-common popularity-contest gnome-software-common gnome-boxes gnome-system-monitor rhythmbox transmission-common gnome-games malcontent gnome-games-app gnome-weather evolution qbittorrent qbittorrent-nox quodlibet parole exfalso yelp seahorse simple-scan gnome-clocks zutty gnome-characters debian-reference-common totem cheese gnome-sound-recorder gnome-connections gnome-music gnome-weather gnome-calculator gnome-calendar gnome-contacts gnome-maps gnome-text-editor gnome-tour"
+_UNDESIRED_PACKAGES="intel-microcode iucode-tool *nvidia* firmware-intel* intel-media-va-driver-non-free synaptic firefox-esr libreoffice-core libreoffice-common popularity-contest gnome-software-common gnome-boxes gnome-system-monitor rhythmbox transmission-common gnome-games malcontent gnome-games-app gnome-weather evolution qbittorrent qbittorrent-nox quodlibet parole exfalso yelp seahorse simple-scan gnome-clocks zutty gnome-characters debian-reference-common totem cheese gnome-sound-recorder gnome-connections gnome-music gnome-weather gnome-calculator gnome-calendar gnome-contacts gnome-maps gnome-text-editor" #gnome-tour
 
 _flatpak()
 {
@@ -17,7 +17,10 @@ _flatpak()
 	flatpak install -y flathub org.mozilla.firefox
 	update-alternatives --install /usr/bin/x-www-browser x-www-browser /var/lib/flatpak/exports/bin/org.mozilla.firefox 200 && update-alternatives --set x-www-browser /var/lib/flatpak/exports/bin/org.mozilla.firefox
 	flatpak install -y flathub org.gnome.TextEditor
+	ln -sf /var/lib/flatpak/app/org.gnome.TextEditor/current/active/export/bin/org.gnome.TextEditor /usr/bin/gedit
 	flatpak install -y flathub com.vscodium.codium
+	ln -sf /var/lib/flatpak/app/com.vscodium.codium/current/active/export/bin/com.vscodium.codium /usr/bin/codium
+	ln -sf /var/lib/flatpak/app/com.vscodium.codium/current/active/export/bin/com.vscodium.codium /usr/bin/vscodium
 	flatpak install -y flathub org.onlyoffice.desktopeditors
 	flatpak install -y flathub org.libreoffice.LibreOffice
 	flatpak install -y flathub org.keepassxc.KeePassXC
@@ -46,12 +49,11 @@ _main()
 	cp /root/.bashrc /root/.bashrc.original
 	echo "export PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin" >> /root/.bashrc # this is IMPORTANT.
 	echo "alias apt-clean='apt autoclean && apt clean && rm -rf /var/lib/apt/lists/* && apt clean'" >> /root/.bashrc
-	echo "alias nala-clean='apt autoclean && apt clean && rm -rf /var/lib/apt/lists/* && apt clean'" >> /root/.bashrc
-	echo "alias wget='wget --inet4-only --https-only'" >> /root/.bashrc
 
 	source /root/.bashrc
 
 	mkdir -p -v /opt
+	#mkdir -p -v /opt/
 	
 	### Disable Gnome Software from Startup Apps
 	rm -rf /etc/xdg/autostart/org.gnome.Software.desktop
@@ -142,7 +144,7 @@ upstream_recursive_servers:
 options trust-ad" > /etc/resolv.conf
 	chattr +i /etc/resolv.conf
 	cp /etc/resolv.conf /etc/resolv.conf.stubby
-	
+
 	### CLOUDFLARE NTPSEC CLIENT
 	cp /etc/ntpsec/ntp.conf /etc/ntpsec/ntp.conf.original
 	echo "driftfile /var/lib/ntpsec/ntp.drift
@@ -186,10 +188,41 @@ rm -rf ./fastfetch-linux-amd64.deb" > /usr/bin/fastfetch-update
 	chmod +x /usr/bin/fastfetch-update
 	bash /usr/bin/fastfetch-update
 
+	### NMAP
+	PWD_=$(pwd)
+	_SOURCE_CODE_=$(curl -s https://nmap.org/download | grep tar.bz2 | head -n 1 | cut -d " " -f 3)
+	if [[ `wget --inet4-only --https-only --server-response --spider https://nmap.org/dist/$_SOURCE_CODE_ 2>&1 | grep '200 OK'` ]]; then
+		apt purge -y nmap*
+		rm -rf /opt/nmap*
+		apt update
+		apt install -y python3-pip gcc g++ make liblua5.4-dev libssl-dev libssh2-1-dev libtool-bin
+		mkdir -p -v /opt/nmap-suite
+		wget --inet4-only --https-only https://nmap.org/dist/$_SOURCE_CODE_
+		tar xjf $_SOURCE_CODE_
+		rm -rf $_SOURCE_CODE_
+		cd nmap-*
+		./configure --quiet --prefix=/opt/nmap-suite --without-zenmap --without-ndiff --without-nping #--without-ncat
+		make -j 1
+		make install
+		ln -sf /opt/nmap-suite/bin/nmap /usr/bin/nmap
+		ln -sf /opt/nmap-suite/bin/ncat /usr/bin/ncat
+	else
+		echo "Nmap source code 404."
+	fi
+	apt purge -y python3-pip libssl-dev libssh2-1-dev libtool-bin #liblua5.4-dev
+	apt autopurge -y
+	cd $PWD_
+
 	### GOOGLE CHROME
 	wget --inet4-only --https-only https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 	apt install -y ./google-chrome-stable_current_amd64.deb
 	rm -rf ./google-chrome-stable_current_amd64.deb
+	
+	### GOOGLE EARTH PRO
+	wget --inet4-only --https-only https://dl.google.com/dl/earth/client/current/google-earth-pro-stable_current_amd64.deb
+	apt install -y ./google-earth-pro-stable_current_amd64.deb
+	rm -rf ./google-earth-pro-stable_current_amd64.deb
+	cp /opt/google/earth/pro/google-earth-pro.desktop /usr/share/applications/google-earth-pro.desktop
 
 	### STEAM
 	dpkg --add-architecture i386
@@ -312,28 +345,6 @@ _others()
 	rm -rf ventoy-linux.tar.gz
 	mv ventoy-* /opt/ventoy
 
-	### NMAP
-	PWD_=$(pwd)
-	_SOURCE_CODE_=$(curl -s https://nmap.org/download | grep tar.bz2 | head -n 1 | cut -d " " -f 3)
-	if [[ `wget --inet4-only --https-only --server-response --spider https://nmap.org/dist/$_SOURCE_CODE_ 2>&1 | grep '200 OK'` ]]; then
-		apt purge -y nmap*
-		rm -rf /opt/nmap*
-		apt update
-		apt install -y python3-pip gcc g++ make liblua5.4-dev libssl-dev libssh2-1-dev libtool-bin
-		mkdir -p -v /opt/nmap-suite
-		wget --inet4-only --https-only https://nmap.org/dist/$_SOURCE_CODE_
-		tar xjf $_SOURCE_CODE_
-		rm -rf $_SOURCE_CODE_
-		cd nmap-*
-		./configure --quiet --prefix=/opt/nmap-suite --without-zenmap --without-ndiff --without-ncat --without-nping
-		make -j 1
-		make install
-		ln -sf /opt/nmap-suite/bin/nmap /usr/bin/nmap
-	else
-		echo "Nmap source code 404."
-	fi
-	cd $PWD_
-
 	### WINE HQ
 	dpkg --add-architecture i386
 	mkdir -pm755 /etc/apt/keyrings
@@ -412,12 +423,6 @@ X-DBUS-ServiceName=
 X-DBUS-StartupType=none
 X-KDE-SubstituteUID=false
 X-KDE-Username=" > /usr/share/applications/ghidra.desktop
-
-	### GOOGLE EARTH PRO
-	wget --inet4-only --https-only https://dl.google.com/dl/earth/client/current/google-earth-pro-stable_current_amd64.deb
-	apt install -y ./google-earth-pro-stable_current_amd64.deb
-	rm -rf ./google-earth-pro-stable_current_amd64.deb
-	cp /opt/google/earth/pro/google-earth-pro.desktop /usr/share/applications/google-earth-pro.desktop
 
 	### VIRTUAL BOX
 	echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | tee /etc/apt/sources.list.d/vbox.list > /dev/null
