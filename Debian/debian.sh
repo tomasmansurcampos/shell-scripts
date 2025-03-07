@@ -49,11 +49,14 @@ _main()
 	cp /root/.bashrc /root/.bashrc.original
 	echo "export PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin" >> /root/.bashrc # this is IMPORTANT.
 	echo "alias apt-clean='apt autoclean && apt clean && rm -rf /var/lib/apt/lists/* && apt clean'" >> /root/.bashrc
-
 	source /root/.bashrc
 
 	mkdir -p -v /opt
-	#mkdir -p -v /opt/
+	mkdir -p -v /opt/third-apps
+	
+	### PURGING PACKAGES
+	apt purge -y $_UNDESIRED_PACKAGES
+	apt autopurge -y
 	
 	### Disable Gnome Software from Startup Apps
 	rm -rf /etc/xdg/autostart/org.gnome.Software.desktop
@@ -72,7 +75,7 @@ deb-src http://deb.debian.org/debian/ $(lsb_release -cs)-updates main contrib no
 
 	### BASIC PACKAGES TO GET LETS START.
 	apt update
-	apt install -y stubby ntpsec ntpsec-doc wget tcpdump elinks software-properties-common ca-certificates lm-sensors fancontrol curl lsb-release htop bmon locales-all hello-traditional ascii
+	apt install -y jq stubby ntpsec ntpsec-doc wget tcpdump elinks software-properties-common ca-certificates lm-sensors fancontrol curl lsb-release htop bmon locales-all hello-traditional ascii
 
 	### STUBBY DOT SERVERS CONFIGURATION
 	systemctl stop stubby.service
@@ -173,10 +176,6 @@ chattr +i /etc/hosts" > /usr/bin/make-hosts-block-ads
 	chmod +x /usr/bin/make-hosts-block-ads
 	bash /usr/bin/make-hosts-block-ads
 
-	### PURGING PACKAGES
-	apt purge -y $_UNDESIRED_PACKAGES
-	apt autopurge -y
-
 	### LIQUORIX KERNEL
 	curl -s 'https://liquorix.net/install-liquorix.sh' | bash
 
@@ -184,28 +183,28 @@ chattr +i /etc/hosts" > /usr/bin/make-hosts-block-ads
 	echo "#!/bin/bash
 wget --inet4-only --https-only https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.deb
 apt install -y ./fastfetch-linux-amd64.deb
-rm -rf ./fastfetch-linux-amd64.deb" > /usr/bin/fastfetch-update
-	chmod +x /usr/bin/fastfetch-update
-	bash /usr/bin/fastfetch-update
+rm -rf ./fastfetch-linux-amd64.deb" > /usr/bin/ffetch-update
+	chmod +x /usr/bin/ffetch-update
+	bash /usr/bin/ffetch-update
 
 	### NMAP
 	PWD_=$(pwd)
 	_SOURCE_CODE_=$(curl -s https://nmap.org/download | grep tar.bz2 | head -n 1 | cut -d " " -f 3)
 	if [[ `wget --inet4-only --https-only --server-response --spider https://nmap.org/dist/$_SOURCE_CODE_ 2>&1 | grep '200 OK'` ]]; then
 		apt purge -y nmap*
-		rm -rf /opt/nmap*
+		rm -rf /opt/third-apps/nmap*
 		apt update
 		apt install -y python3-pip gcc g++ make liblua5.4-dev libssl-dev libssh2-1-dev libtool-bin
-		mkdir -p -v /opt/nmap-suite
+		mkdir -p -v /opt/third-apps/nmap-suite
 		wget --inet4-only --https-only https://nmap.org/dist/$_SOURCE_CODE_
 		tar xjf $_SOURCE_CODE_
 		rm -rf $_SOURCE_CODE_
 		cd nmap-*
-		./configure --quiet --prefix=/opt/nmap-suite --without-zenmap --without-ndiff --without-nping #--without-ncat
+		./configure --quiet --prefix=/opt/third-apps/nmap-suite --without-zenmap --without-ndiff --without-nping #--without-ncat
 		make -j 1
 		make install
-		ln -sf /opt/nmap-suite/bin/nmap /usr/bin/nmap
-		ln -sf /opt/nmap-suite/bin/ncat /usr/bin/ncat
+		ln -sf /opt/third-apps/nmap-suite/bin/nmap /usr/bin/nmap
+		ln -sf /opt/third-apps/nmap-suite/bin/ncat /usr/bin/ncat
 	else
 		echo "Nmap source code 404."
 	fi
@@ -217,7 +216,7 @@ rm -rf ./fastfetch-linux-amd64.deb" > /usr/bin/fastfetch-update
 	wget --inet4-only --https-only https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 	apt install -y ./google-chrome-stable_current_amd64.deb
 	rm -rf ./google-chrome-stable_current_amd64.deb
-	
+
 	### GOOGLE EARTH PRO
 	wget --inet4-only --https-only https://dl.google.com/dl/earth/client/current/google-earth-pro-stable_current_amd64.deb
 	apt install -y ./google-earth-pro-stable_current_amd64.deb
@@ -233,15 +232,15 @@ rm -rf ./fastfetch-linux-amd64.deb" > /usr/bin/fastfetch-update
 
 	### YOUTUBE DOWNLOADER
 	apt purge -y yt-dlp
-	rm -rf /opt/yt-*
-	wget --inet4-only --https-only https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O /opt/yt-dlp
-	chmod 755 /opt/yt-dlp
-	ln -sf /opt/yt-dlp /usr/bin/yt-dlp
+	rm -rf /opt/third-apps/yt-*
+	wget --inet4-only --https-only https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O /opt/third-apps/yt-dlp
+	chmod 755 /opt/third-apps/yt-dlp
+	ln -sf /opt/third-apps/yt-dlp /usr/bin/yt-dlp
 
 	mkdir -v -p /opt/songs
 	touch /opt/songs/SONG{001..101}.flac
 
-	#chown tomas:tomas -R /opt
+	chown tomas:tomas -R /opt/third-apps
 
 	### OFFICIAL DEBIAN PACKAGES
 	apt update
@@ -276,9 +275,6 @@ _flatpak
 _cookie_fortune
 
 /usr/bin/cookie-fortune
-
-
-
 
 ### SOME OWN REFERENCE:
 
@@ -321,12 +317,10 @@ _cookie_fortune
 #default-sample-channels = 2
 #default-channel-map = front-left,front-right" >> /etc/pulse/daemon.conf
 
-
 #PARTICIPATE="yes"
 #ENCRYPT="yes"
 #USEHTTP="yes"
 #DAY="6"
-
 
 # systemctl --type=service --state=running
 
@@ -334,16 +328,16 @@ _others()
 {
 	### SQLMAP
 	apt purge -y sqlmap
-	rm -rf /opt/sqlmap*
-	git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git /opt/sqlmap-dev
-	ln -sf /opt/sqlmap-dev/sqlmap.py /usr/bin/sqlmap
+	rm -rf /opt/third-apps/sqlmap*
+	git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git /opt/third-apps/sqlmap-dev
+	ln -sf /opt/third-apps/sqlmap-dev/sqlmap.py /usr/bin/sqlmap
 
 	### VENTOY
-	rm -rf /opt/ventoy*
+	rm -rf /opt/third-apps/ventoy*
 	wget --inet4-only --https-only $(curl --silent "https://api.github.com/repos/ventoy/Ventoy/releases/latest" | jq -r '(.assets[1].browser_download_url)') -O ventoy-linux.tar.gz
 	tar -xf ventoy-linux.tar.gz
 	rm -rf ventoy-linux.tar.gz
-	mv ventoy-* /opt/ventoy
+	mv ventoy-* /opt/third-apps/ventoy
 
 	### WINE HQ
 	dpkg --add-architecture i386
@@ -395,21 +389,21 @@ Pin-Priority: 1000
 	apt install -y msopenjdk-21 powershell-lts
 
 	### GHIDRA
-	rm -rf /opt/ghidra/
+	rm -rf /opt/third-apps/ghidra/
 	wget --inet4-only --https-only $(curl --silent "https://api.github.com/repos/NationalSecurityAgency/ghidra/releases/latest" | jq -r '(.assets[].browser_download_url)')
 	unzip -q ghidra_*.zip
 	rm -rf ghidra_*.zip
-	mv ghidra_* /opt/ghidra
-	ln -sf /opt/ghidra/ghidraRun /usr/bin/ghidra
-	rm -rf /opt/ghidra/ghidraRun.bat
+	mv ghidra_* /opt/third-apps/ghidra
+	ln -sf /opt/third-apps/ghidra/ghidraRun /usr/bin/ghidra
+	rm -rf /opt/third-apps/ghidra/ghidraRun.bat
     echo "[Desktop Entry]
 Categories=Application;Development;
 Comment[en_US]=Ghidra Software Reverse Engineering Suite
 Comment=Ghidra Software Reverse Engineering Suite
-Exec=/opt/ghidra/ghidraRun
+Exec=/opt/third-apps/ghidra/ghidraRun
 GenericName[en_US]=Ghidra Software Reverse Engineering Suite
 GenericName=Ghidra Software Reverse Engineering Suite
-Icon=/opt/ghidra/docs/images/GHIDRA_1.png
+Icon=/opt/third-apps/ghidra/docs/images/GHIDRA_1.png
 MimeType=
 Name[en_US]=Ghidra
 Name=Ghidra
@@ -440,12 +434,12 @@ X-KDE-Username=" > /usr/share/applications/ghidra.desktop
     dpkg --add-architecture i386
     apt update
     apt install -y git libsdl2-dev:i386 gcc g++ gcc-multilib g++-multilib yasm clang lld lld:i386 mangohud mangohud:i386
-    git clone https://github.com/zaps166/NFSIISE /opt/NFSIISE
-    cd /opt/NFSIISE
+    git clone https://github.com/zaps166/NFSIISE /opt/third-apps/NFSIISE
+    cd /opt/third-apps/NFSIISE
     git submodule update --init --recursive
     ./compile_nfs cpp
     mv /opt/NFSIISE/Need\ For\ Speed\ II\ SE/ /opt/NeedForSpeedIISE
-	rm -rf /opt/NFSIISE
+	rm -rf /opt/third-apps/NFSIISE
 	cd /tmp
 
 	### ANYDESK
@@ -457,17 +451,17 @@ X-KDE-Username=" > /usr/share/applications/ghidra.desktop
 	apt install -y anydesk
 	systemctl stop anydesk.service
 	systemctl disable anydesk.service
-	
+
 	### TELEGRAM
 	wget --inet4-only --https-only https://telegram.org/dl/desktop/linux -O telegram.tar.xz
 	tar xf telegram.tar.xz
 	rm -rf telegram.tar.xz
-	mv Telegram /opt
+	mv Telegram /opt/third-apps
 	echo "[Desktop Entry]
 Name=Telegram
 Comment=New era of messaging
-TryExec=/opt/Telegram/Telegram
-Exec=/opt/Telegram/Telegram -- %u
+TryExec=/opt/third-apps/Telegram/Telegram
+Exec=/opt/third-apps/Telegram/Telegram -- %u
 Icon=telegram
 Terminal=false
 StartupWMClass=TelegramDesktop
@@ -482,10 +476,11 @@ X-GNOME-UsesNotifications=true
 X-GNOME-SingleWindow=true
 
 [Desktop Action quit]
-Exec=/opt/Telegram/Telegram -quit
+Exec=/opt/third-apps/Telegram/Telegram -quit
 Name=Quit Telegram
 Icon=application-exit" > /usr/share/applications/telegram.desktop
-	
+	ln -sf /opt/third-apps/Telegram/Telegram /usr/bin/telegram
+
 	### FIREFOX
 	install -d -m 0755 /etc/apt/keyrings
 	wget --inet4-only --https-only -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
@@ -506,7 +501,7 @@ Pin-Priority: 1000
 	wget --https-only --inet4-only -O firefox.tar.bz2 "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
 	tar -xf firefox.tar.bz2
 	rm -rf firefox.tar.bz2
-	mv firefox /opt/
+	mv firefox /opt/third-apps
 	echo "[Desktop Entry]
 Name=Firefox
 Comment=Browse the World Wide Web
@@ -515,13 +510,26 @@ GenericName=Web Browser
 GenericName[es]=Navegador web
 X-GNOME-FullName=Firefox Web Browser
 X-GNOME-FullName[es]=Navegador web Firefox
-Exec=/opt/firefox/firefox %u
+Exec=/opt/third-apps/firefox/firefox %u
 Terminal=false
 X-MultipleArgs=false
 Type=Application
-Icon=/opt/firefox/browser/chrome/icons/default/default128.png
+Icon=/opt/third-apps/third-apps/firefox/browser/chrome/icons/default/default128.png
 Categories=Network;WebBrowser;
 MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/vnd.mozilla.xul+xml;application/rss+xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;
 StartupWMClass=firefox
 StartupNotify=true" > /usr/share/applications/firefox.desktop
+	ln -sf /opt/third-apps/firefox/firefox /usr/bin/firefox
+
+	### MULLVAD WEB BROWSER
+	curl -fsSLo /usr/share/keyrings/mullvad-keyring.asc https://repository.mullvad.net/deb/mullvad-keyring.asc
+	echo "deb [arch=$( dpkg --print-architecture ) signed-by=/usr/share/keyrings/mullvad-keyring.asc] https://repository.mullvad.net/deb/stable $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/mullvad.list
+	apt update
+	apt install -y mullvad-browser
+	
+	### DNSCRYPT-PROXY
+	wget --inet4-only --https-only $(curl --silent "https://api.github.com/repos/DNSCrypt/dnscrypt-proxy/releases/latest" | jq -r '(.assets[].browser_download_url)' | grep linux_$(uname -m) | head -n 1)
+	tar -xzf dnscrypt.tar.gz
+	mv linux_$(uname -m) /opt/third-apps
+
 }
