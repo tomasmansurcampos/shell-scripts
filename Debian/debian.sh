@@ -1,8 +1,8 @@
 #!/bin/bash
 
-_PACKAGES="nala flatpak bleachbit python-is-python3 rar unrar zip unzip p7zip-full p7zip-rar gnome-disk-utility ffmpeg flac audacity vlc sox spek gnupg git make binutils gcc g++"
+_PACKAGES="gnome-boxes nala flatpak bleachbit python-is-python3 rar unrar zip unzip p7zip-full p7zip-rar gnome-disk-utility ffmpeg flac audacity vlc sox spek gnupg git make binutils gcc g++"
 
-_UNDESIRED_PACKAGES="intel-microcode iucode-tool *nvidia* firmware-intel* intel-media-va-driver-non-free synaptic firefox-esr libreoffice-core libreoffice-common popularity-contest gnome-software-common gnome-boxes gnome-system-monitor rhythmbox transmission-common gnome-games malcontent gnome-games-app gnome-weather evolution qbittorrent qbittorrent-nox quodlibet parole exfalso yelp seahorse simple-scan gnome-clocks zutty gnome-characters debian-reference-common totem cheese gnome-sound-recorder gnome-connections gnome-music gnome-weather gnome-calculator gnome-calendar gnome-contacts gnome-maps gnome-text-editor" #gnome-tour
+_UNDESIRED_PACKAGES="intel-microcode iucode-tool *nvidia* firmware-intel* intel-media-va-driver-non-free synaptic firefox-esr smplayer smtube mpv qps quassel meteo-qt audacious libreoffice-core libreoffice-common popularity-contest gnome-software-common gnome-boxes gnome-system-monitor rhythmbox transmission-common gnome-games malcontent gnome-games-app gnome-weather evolution qbittorrent qbittorrent-nox quodlibet parole exfalso yelp seahorse simple-scan gnome-clocks zutty gnome-characters debian-reference-common totem cheese gnome-sound-recorder gnome-connections gnome-music gnome-weather gnome-calculator gnome-calendar gnome-contacts gnome-maps gnome-text-editor" #gnome-tour
 
 _flatpak()
 {
@@ -24,8 +24,8 @@ _flatpak()
 	flatpak install -y flathub org.onlyoffice.desktopeditors
 	flatpak install -y flathub org.libreoffice.LibreOffice
 	flatpak install -y flathub org.keepassxc.KeePassXC
-	flatpak install -y flathub org.gnome.Boxes
 	flatpak install -y flathub io.github.peazip.PeaZip
+	flatpak install -y flathub network.loki.Session
 	flatpak install -y flathub org.telegram.desktop
 	flatpak install -y flathub com.discordapp.Discord
 	flatpak install -y flathub io.bassi.Amberol
@@ -37,6 +37,8 @@ _flatpak()
 	flatpak install -y flathub org.shotcut.Shotcut
 	
 	flatpak update -y
+
+	chmod 755 /home/*/.local/share/flatpak
 }
 
 _main()
@@ -52,7 +54,8 @@ _main()
 	source /root/.bashrc
 
 	mkdir -p -v /opt
-	mkdir -p -v /opt/third-apps
+	mkdir -p -v /opt/apps
+	mkdir -p -v /opt/games
 	
 	### PURGING PACKAGES
 	apt purge -y $_UNDESIRED_PACKAGES
@@ -80,7 +83,9 @@ deb-src http://deb.debian.org/debian/ $(lsb_release -cs)-updates main contrib no
 	### STUBBY DOT SERVERS CONFIGURATION
 	systemctl stop stubby.service
 	cp /etc/stubby/stubby.yml /etc/stubby/stubby.yml.original
-	echo 'resolution_type: GETDNS_RESOLUTION_STUB
+	### GOOGLE PUBLIC DNS
+	echo '### GOOGLE PUBLIC DNS
+resolution_type: GETDNS_RESOLUTION_STUB
 dns_transport_list:
   - GETDNS_TRANSPORT_TLS
 tls_authentication: GETDNS_AUTHENTICATION_REQUIRED
@@ -92,12 +97,15 @@ tls_min_version: GETDNS_TLS1_3
 tls_max_version: GETDNS_TLS1_3
 listen_addresses:
   - 127.0.0.3
+#dnssec: GETDNS_EXTENSION_TRUE
 upstream_recursive_servers:
   - address_data: 8.8.8.8
     tls_auth_name: "dns.google"
   - address_data: 8.8.4.4
     tls_auth_name: "dns.google"' > /etc/stubby/stubby.yml.google
-	echo 'resolution_type: GETDNS_RESOLUTION_STUB
+    ### CLOUDFLARE DNS
+	echo '### CLOUDFLARE DNS
+resolution_type: GETDNS_RESOLUTION_STUB
 dns_transport_list:
   - GETDNS_TRANSPORT_TLS
 tls_authentication: GETDNS_AUTHENTICATION_REQUIRED
@@ -109,12 +117,15 @@ tls_min_version: GETDNS_TLS1_3
 tls_max_version: GETDNS_TLS1_3
 listen_addresses:
   - 127.0.0.3
+#dnssec: GETDNS_EXTENSION_TRUE
 upstream_recursive_servers:
   - address_data: 1.1.1.1
     tls_auth_name: "one.one.one.one"
   - address_data: 1.0.0.1
     tls_auth_name: "one.one.one.one"' > /etc/stubby/stubby.yml.cloudflare
-		echo 'resolution_type: GETDNS_RESOLUTION_STUB
+    ### MULLVAD DNS BASE, Ads Trackers Malware
+	echo '### MULLVAD DNS BASE, Ads Trackers Malware
+resolution_type: GETDNS_RESOLUTION_STUB
 dns_transport_list:
   - GETDNS_TRANSPORT_TLS
 tls_authentication: GETDNS_AUTHENTICATION_REQUIRED
@@ -126,6 +137,61 @@ tls_min_version: GETDNS_TLS1_3
 tls_max_version: GETDNS_TLS1_3
 listen_addresses:
   - 127.0.0.3
+#dnssec: GETDNS_EXTENSION_TRUE
+upstream_recursive_servers:
+  - address_data: 194.242.2.4
+    tls_auth_name: "base.dns.mullvad.net"' > /etc/stubby/stubby.yml.mullvad-base
+    ### MULLVAD DNS FAMILY, Ads Trackers Malware Adult Gambling
+	echo '### MULLVAD DNS FAMILY, Ads Trackers Malware Adult Gambling
+resolution_type: GETDNS_RESOLUTION_STUB
+dns_transport_list:
+  - GETDNS_TRANSPORT_TLS
+tls_authentication: GETDNS_AUTHENTICATION_REQUIRED
+tls_query_padding_blocksize: 128
+edns_client_subnet_private : 1
+round_robin_upstreams: 0
+idle_timeout: 10000
+tls_min_version: GETDNS_TLS1_3
+tls_max_version: GETDNS_TLS1_3
+listen_addresses:
+  - 127.0.0.3
+#dnssec: GETDNS_EXTENSION_TRUE
+upstream_recursive_servers:
+  - address_data: 194.242.2.6
+    tls_auth_name: "family.dns.mullvad.net"' > /etc/stubby/stubby.yml.mullvad-family
+    ### MULLVAD DNS ALL, Ads Trackers Malware Adult Gambling SocialMedia
+	echo '### MULLVAD DNS ALL, Ads Trackers Malware Adult Gambling SocialMedia
+resolution_type: GETDNS_RESOLUTION_STUB
+dns_transport_list:
+  - GETDNS_TRANSPORT_TLS
+tls_authentication: GETDNS_AUTHENTICATION_REQUIRED
+tls_query_padding_blocksize: 128
+edns_client_subnet_private : 1
+round_robin_upstreams: 0
+idle_timeout: 10000
+tls_min_version: GETDNS_TLS1_3
+tls_max_version: GETDNS_TLS1_3
+listen_addresses:
+  - 127.0.0.3
+#dnssec: GETDNS_EXTENSION_TRUE
+upstream_recursive_servers:
+  - address_data: 194.242.2.9
+    tls_auth_name: "all.dns.mullvad.net"' > /etc/stubby/stubby.yml.mullvad-all
+    ### DNS.SB
+	echo '### DNS.SB
+resolution_type: GETDNS_RESOLUTION_STUB
+dns_transport_list:
+  - GETDNS_TRANSPORT_TLS
+tls_authentication: GETDNS_AUTHENTICATION_REQUIRED
+tls_query_padding_blocksize: 128
+edns_client_subnet_private : 1
+round_robin_upstreams: 0
+idle_timeout: 10000
+tls_min_version: GETDNS_TLS1_3
+tls_max_version: GETDNS_TLS1_3
+listen_addresses:
+  - 127.0.0.3
+#dnssec: GETDNS_EXTENSION_TRUE
 upstream_recursive_servers:
   - address_data: 185.222.222.222
     tls_auth_name: "dot.sb"
@@ -192,25 +258,27 @@ rm -rf ./fastfetch-linux-amd64.deb" > /usr/bin/ffetch-update
 	_SOURCE_CODE_=$(curl -s https://nmap.org/download | grep tar.bz2 | head -n 1 | cut -d " " -f 3)
 	if [[ `wget --inet4-only --https-only --server-response --spider https://nmap.org/dist/$_SOURCE_CODE_ 2>&1 | grep '200 OK'` ]]; then
 		apt purge -y nmap*
-		rm -rf /opt/third-apps/nmap*
+		rm -rf /opt/apps/nmap*
+		wget --inet4-only --https-only https://nmap.org/dist/$_SOURCE_CODE_
 		apt update
 		apt install -y python3-pip gcc g++ make liblua5.4-dev libssl-dev libssh2-1-dev libtool-bin
-		mkdir -p -v /opt/third-apps/nmap-suite
-		wget --inet4-only --https-only https://nmap.org/dist/$_SOURCE_CODE_
+		mkdir -p -v /opt/apps/nmap-suite
 		tar xjf $_SOURCE_CODE_
 		rm -rf $_SOURCE_CODE_
 		cd nmap-*
-		./configure --quiet --prefix=/opt/third-apps/nmap-suite --without-zenmap --without-ndiff --without-nping #--without-ncat
+		./configure --quiet --prefix=/opt/apps/nmap-suite -without-zenmap --without-ndiff #--without-nping --without-ncat
 		make -j 1
 		make install
-		ln -sf /opt/third-apps/nmap-suite/bin/nmap /usr/bin/nmap
-		ln -sf /opt/third-apps/nmap-suite/bin/ncat /usr/bin/ncat
+		ln -sf /opt/apps/nmap-suite/bin/nmap /usr/bin/nmap
+		ln -sf /opt/apps/nmap-suite/bin/ncat /usr/bin/ncat
+		ln -sf /opt/apps/nmap-suite/bin/nping /usr/bin/nping
 	else
 		echo "Nmap source code 404."
 	fi
 	apt purge -y python3-pip libssl-dev libssh2-1-dev libtool-bin #liblua5.4-dev
 	apt autopurge -y
 	cd $PWD_
+	rm -rf nmap*
 
 	### GOOGLE CHROME
 	wget --inet4-only --https-only https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
@@ -232,15 +300,30 @@ rm -rf ./fastfetch-linux-amd64.deb" > /usr/bin/ffetch-update
 
 	### YOUTUBE DOWNLOADER
 	apt purge -y yt-dlp
-	rm -rf /opt/third-apps/yt-*
-	wget --inet4-only --https-only https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O /opt/third-apps/yt-dlp
-	chmod 755 /opt/third-apps/yt-dlp
-	ln -sf /opt/third-apps/yt-dlp /usr/bin/yt-dlp
+	rm -rf /opt/apps/yt-*
+	wget --inet4-only --https-only https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O /opt/apps/yt-dlp
+	chmod 755 /opt/apps/yt-dlp
+	ln -sf /opt/apps/yt-dlp /usr/bin/yt-dlp
+
+	### SQLMAP
+	apt purge -y sqlmap
+	rm -rf /opt/apps/sqlmap*
+	git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git /opt/apps/sqlmap-dev
+	ln -sf /opt/apps/sqlmap-dev/sqlmap.py /usr/bin/sqlmap
+
+	### Android SDK Platform-Tools - adb and fastboot
+	echo "rm -rf /opt/apps/platform-tools*
+	wget --inet4-only --https-only https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+	unzip platform-tools-latest-linux.zip
+	rm -rf platform-tools-latest-linux.zip
+	mv platform-tools /opt/apps
+	ln -sf /opt/apps/platform-tools/adb /usr/bin/adb
+	ln -sf /opt/apps/platform-tools/fastboot /usr/bin/fastboot" > /usr/bin/android-sdk-platform-tools-installer
+	chmod +x /usr/bin/android-sdk-platform-tools-installer
+	bash /usr/bin/android-sdk-platform-tools-installer
 
 	mkdir -v -p /opt/songs
 	touch /opt/songs/SONG{001..101}.flac
-
-	chown tomas:tomas -R /opt/third-apps
 
 	### OFFICIAL DEBIAN PACKAGES
 	apt update
@@ -326,11 +409,7 @@ _cookie_fortune
 
 _others()
 {
-	### SQLMAP
-	apt purge -y sqlmap
-	rm -rf /opt/third-apps/sqlmap*
-	git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git /opt/third-apps/sqlmap-dev
-	ln -sf /opt/third-apps/sqlmap-dev/sqlmap.py /usr/bin/sqlmap
+	
 
 	### VENTOY
 	rm -rf /opt/third-apps/ventoy*
