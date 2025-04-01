@@ -10,7 +10,7 @@ wget --inet4-only --https-only https://raw.githubusercontent.com/badmojr/1Hosts/
 wget --inet4-only --https-only https://raw.githubusercontent.com/badmojr/1Hosts/refs/heads/master/Xtra/hosts.txt -O /etc/hosts-1hosts-xtra
 wget --inet4-only --https-only https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/multi.txt -O /etc/hosts-hagezi-multi
 wget --inet4-only --https-only https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/ultimate.txt -O /etc/hosts-hagezi-ultimate
-wget --inet4-only --https-only https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/tif.txt /etc/hosts-hagezi-tif
+wget --inet4-only --https-only https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/tif.txt -O /etc/hosts-hagezi-tif
 wget --inet4-only --https-only https://big.oisd.nl/domainswild2 -O /etc/hosts-oisd
 wget --inet4-only --https-only https://www.github.developerdan.com/hosts/lists/ads-and-tracking-extended.txt -O /etc/hosts-ads-and-tracking-extended
 wget --inet4-only --https-only https://www.github.developerdan.com/hosts/lists/tracking-aggressive-extended.txt -O /etc/hosts-tracking-aggressive-extended
