@@ -1,4 +1,6 @@
-#!/bin/bash
+### BLOCKING ADS TRACKERS MALWARE SPYWARE TELEMETRY CRYPTOMINING BY HOSTS FILE DIRECTLY
+cp /etc/hosts /etc/hosts.original
+echo "#!/bin/bash
 
 chattr -i /etc/hosts
 
@@ -43,4 +45,6 @@ echo "0.0.0.0 www.something.com" >> /etc/hosts-ad-blocker
 
 awk '!seen[$0]++' /etc/hosts-ad-blocker > /etc/hosts
 
-chattr +i /etc/hosts
+chattr +i /etc/hosts" > /usr/bin/make-hosts-block-ads
+chmod +x /usr/bin/make-hosts-block-ads
+bash /usr/bin/make-hosts-block-ads
