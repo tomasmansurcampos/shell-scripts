@@ -18,11 +18,16 @@ wget --inet4-only --https-only https://raw.githubusercontent.com/hagezi/dns-bloc
 wget --inet4-only --https-only https://big.oisd.nl/domainswild2 -O /etc/hosts-oisd
 wget --inet4-only --https-only https://www.github.developerdan.com/hosts/lists/ads-and-tracking-extended.txt -O /etc/hosts-ads-and-tracking-extended
 wget --inet4-only --https-only https://www.github.developerdan.com/hosts/lists/tracking-aggressive-extended.txt -O /etc/hosts-tracking-aggressive-extended
+wget --inet4-only --https-only https://github.com/xRuffKez/NRD/raw/refs/heads/main/lists/14-day/domains-only/nrd-14day.txt -O /etc/hosts-14day-nrd
+wget --inet4-only --https-only https://github.com/xRuffKez/NRD/raw/refs/heads/main/lists/14-day_dga/domains-only/nrd-14day-dga.txt -O /etc/hosts-14day-nrd-dga
 
 tr -s '\n' < /etc/hosts-oisd > /etc/hosts-oisd-big
 grep -Ev "^#|^$" /etc/hosts-oisd-big > /etc/hosts-oisd
 sed 's/^/0.0.0.0 /g' /etc/hosts-oisd > /etc/hosts-oisd-big
 rm -rf /etc/hosts-oisd
+
+awk '{print "0.0.0.0 " $0}' /etc/hosts-14day-nrd > /etc/hosts-14dayNRD
+awk '{print "0.0.0.0 " $0}' /etc/hosts-14day-nrd-dga >> /etc/hosts-14dayNRD
 
 cat /etc/hosts.original > /etc/hosts-ad-blocker
 
@@ -38,9 +43,10 @@ cat /etc/hosts-hagezi-tif >> /etc/hosts-ad-blocker
 cat /etc/hosts-oisd-big >> /etc/hosts-ad-blocker
 cat /etc/hosts-ads-and-tracking-extended >> /etc/hosts-ad-blocker
 cat /etc/hosts-tracking-aggressive-extended >> /etc/hosts-ad-blocker
+cat /etc/hosts-14dayNRD >> /etc/hosts-ad-blocker
 
-sed -i -e 's/crash.steampowered.com/0.0.0.0/g' /etc/hosts-ad-blocker
 sed -i -e 's/web.facebook.com/0.0.0.0/g' /etc/hosts-ad-blocker
+sed -i -e 's/crash.steampowered.com/0.0.0.0/g' /etc/hosts-ad-blocker
 sed -i -e 's/click.discord.com/0.0.0.0/g' /etc/hosts-ad-blocker
 
 awk '!seen[$0]++' /etc/hosts-ad-blocker > /etc/hosts
