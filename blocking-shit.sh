@@ -20,6 +20,7 @@ wget --inet4-only --https-only https://www.github.developerdan.com/hosts/lists/a
 wget --inet4-only --https-only https://www.github.developerdan.com/hosts/lists/tracking-aggressive-extended.txt -O /etc/hosts-tracking-aggressive-extended
 wget --inet4-only --https-only https://github.com/xRuffKez/NRD/raw/refs/heads/main/lists/14-day/domains-only/nrd-14day.txt -O /etc/hosts-14day-nrd
 wget --inet4-only --https-only https://github.com/xRuffKez/NRD/raw/refs/heads/main/lists/14-day_dga/domains-only/nrd-14day-dga.txt -O /etc/hosts-14day-nrd-dga
+wget --inet4-only --https-only https://hosts.ubuntu101.co.za/hosts -O /etc/hosts-ultimate-hosts-blacklist
 
 tr -s '\n' < /etc/hosts-oisd > /etc/hosts-oisd-big
 grep -Ev "^#|^$" /etc/hosts-oisd-big > /etc/hosts-oisd
@@ -44,6 +45,7 @@ cat /etc/hosts-oisd-big >> /etc/hosts-ad-blocker
 cat /etc/hosts-ads-and-tracking-extended >> /etc/hosts-ad-blocker
 cat /etc/hosts-tracking-aggressive-extended >> /etc/hosts-ad-blocker
 cat /etc/hosts-14dayNRD >> /etc/hosts-ad-blocker
+cat /etc/hosts-ultimate-hosts-blacklist >> /etc/hosts-ad-blocker
 
 sed -i -e 's/web.facebook.com/0.0.0.0/g' /etc/hosts-ad-blocker
 sed -i -e 's/crash.steampowered.com/0.0.0.0/g' /etc/hosts-ad-blocker
