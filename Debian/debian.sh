@@ -225,7 +225,7 @@ EOF
 	
 	### QBITTORRENT-NOX
 	adduser --system --group qbittorrent-nox
-	adduser tomas qbittorrent-nox
+	adduser some qbittorrent-nox
 	echo "[Unit]
 Description=qBittorrent Command Line Client
 After=network.target
@@ -490,7 +490,7 @@ EOF
 	bash /usr/bin/installer-go
 
 	###
-	chown -R tomas:tomas /opt/apps/*
+	chown -R some:some /opt/apps/*
 
 	mkdir -v -p /opt/songs
 	touch /opt/songs/SONG{001..102}.flac
