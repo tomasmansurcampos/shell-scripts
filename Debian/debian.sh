@@ -1,8 +1,8 @@
 #!/bin/bash
 
-_PACKAGES="flatpak keepassxc fwupd bleachbit python-is-python3 rar unrar zip unzip p7zip-full p7zip-rar gnome-disk-utility audacity flac ffmpeg bpm-tools sox spek gnupg git make binutils geany gcc gcc-doc picard clementine"
+_PACKAGES="flatpak qbittorrent-nox keepassxc fwupd bleachbit python-is-python3 rar unrar zip unzip p7zip-full p7zip-rar gnome-disk-utility audacity flac ffmpeg bpm-tools sox spek gnupg git make binutils geany gcc gcc-doc picard clementine"
 
-_UNDESIRED_PACKAGES="firefox-esr firefox* synaptic vlc vlc-bin vlc-data smplayer smtube mpv qps quassel meteo-qt audacious popularity-contest evolution qbittorrent qbittorrent-nox quodlibet parole exfalso yelp seahorse totem cheese" #malcontent
+_UNDESIRED_PACKAGES="firefox-esr firefox* synaptic vlc vlc-bin vlc-data smplayer smtube mpv qps quassel meteo-qt audacious popularity-contest evolution qbittorrent quodlibet parole exfalso yelp seahorse totem cheese" #malcontent
 
 _INTEL_SHIT="intel-microcode iucode-tool *nvidia* firmware-intel* intel-media-va-driver-non-free"
 
@@ -44,7 +44,7 @@ _flatpak()
 	#flatpak install -y flathub io.bassi.Amberol
 	#flatpak install -y flathub io.freetubeapp.FreeTube
 	flatpak install -y flathub com.spotify.Client
-	flatpak install -y flathub org.qbittorrent.qBittorrent
+	#flatpak install -y flathub org.qbittorrent.qBittorrent
 	#flatpak install -y flathub com.warlordsoftwares.youtube-downloader-4ktube
 	flatpak install -y flathub org.nicotine_plus.Nicotine
 	flatpak install -y flathub org.mixxx.Mixxx
@@ -68,13 +68,13 @@ _main()
 	echo "export PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin" >> /root/.bashrc # this is IMPORTANT.
 	echo "alias apt-clean='apt autoclean && apt clean && rm -rf /var/lib/apt/lists/* && apt clean'" >> /root/.bashrc
 	source /root/.bashrc
-	
+
 	### PURGING SHIT
 	apt purge -y $_UNDESIRED_PACKAGES $_GNOME_SHIT $_INTEL_SHIT
 	apt autopurge -y
 	
 	### Disable Gnome Software from Startup Apps
-	#rm -rf /etc/xdg/autostart/org.gnome.Software.desktop
+	rm -rf /etc/xdg/autostart/org.gnome.Software.desktop
 
 	### BEST SOURCES LIST FILES EVER, REALLY. $(lsb_release -cs)
 	cp /etc/apt/sources.list /etc/apt/sources.list.original
@@ -113,17 +113,17 @@ tls_min_version: GETDNS_TLS1_3
 tls_max_version: GETDNS_TLS1_3
 listen_addresses:
   - 127.0.0.3
-#  - 0::1
+  - 0::1
 #dnssec: GETDNS_EXTENSION_TRUE
 upstream_recursive_servers:
   - address_data: 8.8.8.8
     tls_auth_name: "dns.google"
   - address_data: 8.8.4.4
     tls_auth_name: "dns.google"
-#  - address_data: 2001:4860:4860::8888
-#    tls_auth_name: "dns.google"
-#  - address_data: 2001:4860:4860::8844
-#    tls_auth_name: "dns.google"' > /etc/stubby/stubby.yml.google
+  - address_data: 2001:4860:4860::8888
+    tls_auth_name: "dns.google"
+  - address_data: 2001:4860:4860::8844
+    tls_auth_name: "dns.google"' > /etc/stubby/stubby.yml.google
 	### DNS.SB
 	echo '### DNS.SB
 resolution_type: GETDNS_RESOLUTION_STUB
@@ -138,7 +138,7 @@ tls_min_version: GETDNS_TLS1_3
 tls_max_version: GETDNS_TLS1_3
 listen_addresses:
   - 127.0.0.3
-#  - 0::1
+  - 0::1
 #dnssec: GETDNS_EXTENSION_TRUE
 upstream_recursive_servers:
   - address_data: 185.222.222.222
@@ -157,8 +157,8 @@ upstream_recursive_servers:
 
 	### STATIC RESOLV CONF FILE
 	cp /etc/resolv.conf /etc/resolv.conf.original
-	echo "nameserver 127.0.0.3
-#nameserver ::1
+	echo "nameserver ::1
+nameserver 127.0.0.3
 options trust-ad" > /etc/resolv.conf.stubby
 	cp /etc/resolv.conf.stubby /etc/resolv.conf
 	chattr +i /etc/resolv.conf
@@ -206,15 +206,56 @@ systemctl restart stubby.service" > /usr/bin/dnssb
 	chmod +x /usr/bin/dnssb
 
 	### FASTFETCH
-	echo "#!/bin/bash
-wget --inet4-only --https-only https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.deb
-apt install -y ./fastfetch-linux-amd64.deb
-rm -rf ./fastfetch-linux-amd64.deb" > /usr/bin/installer-fastfetch-cli
+    cat << 'EOF' | tee /usr/bin/installer-fastfetch-cli > /dev/null
+#!/bin/bash
+URL_="https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.deb"
+if [[ `wget --inet4-only --https-only --server-response --spider $URL_ 2>&1 | grep '200 OK'` ]]; then
+    wget --inet4-only --https-only $URL_
+    apt install -y ./fastfetch-linux-amd64.deb
+    rm -rf ./fastfetch-linux-amd64.deb
+else
+    echo "Error fastfetch-linux-amd64.deb file not found."
+fi
+EOF
 	chmod +x /usr/bin/installer-fastfetch-cli
 	bash /usr/bin/installer-fastfetch-cli
 
 	### LIQUORIX KERNEL
 	curl -s 'https://liquorix.net/install-liquorix.sh' | bash
+	
+	### QBITTORRENT-NOX
+	adduser --system --group qbittorrent-nox
+	adduser tomas qbittorrent-nox
+	echo "[Unit]
+Description=qBittorrent Command Line Client
+After=network.target
+
+[Service]
+Type=forking
+User=qbittorrent-nox
+Group=qbittorrent-nox
+UMask=007
+ExecStart=/usr/bin/qbittorrent-nox -d --webui-port=8080
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target" > /etc/systemd/system/qbittorrent-nox.service
+	mkdir /opt/qbittorrent-nox
+	chown qbittorrent-nox:qbittorrent-nox /opt/qbittorrent-nox
+	usermod -d /opt/qbittorrent-nox qbittorrent-nox
+	systemctl daemon-reload
+	#systemctl start qbittorrent-nox
+	#systemctl enable qbittorrent-nox
+	
+	### PACKET TRACER NO-NETWORK
+	echo "[Desktop Entry]
+Type=Application
+Exec=unshare -rn /opt/pt/packettracer
+Name=PacsitoTreiser NO-NETWORK
+Icon=/opt/pt/art/app.png
+Terminal=false
+StartupNotify=true
+MimeType=application/x-pkt;application/x-pka;application/x-pkz;application/x-pks;application/x-pksz;" > /usr/share/applications/packet-tracer-no-network.desktop
 
 	### FIREFOX
 	#apt update && apt install --install-recommends -y firefox-esr
@@ -234,47 +275,140 @@ Pin-Priority: 1000
 	wget --inet4-only --https-only https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 	apt install -y ./google-chrome-stable_current_amd64.deb
 	rm -rf ./google-chrome-stable_current_amd64.deb
-	
-	### STEAM
-	### cleaning previous steam files.
-	apt purge -y steam*
-	apt-get --allow-remove-essential purge -y ".*:i386"
-	dpkg --remove-architecture i386
-	apt autopurge -y
-	rm -rf /home/*/.steam*
-	apt autoclean && apt clean && rm -rf /var/lib/apt/lists/* && apt clean
-	apt update
-	### installation:
-	dpkg --add-architecture i386
-	apt update
-	apt install -y steam-installer
-	apt install -y mesa-vulkan-drivers libglx-mesa0:i386 mesa-vulkan-drivers:i386 libgl1-mesa-dri:i386
-	#apt install -y mangohud mangohud:i386
-	
+
+	### MULLVAD
+	curl -fsSLo /usr/share/keyrings/mullvad-keyring.asc https://repository.mullvad.net/deb/mullvad-keyring.asc
+	echo "deb [signed-by=/usr/share/keyrings/mullvad-keyring.asc arch=$( dpkg --print-architecture )] https://repository.mullvad.net/deb/stable stable main" | tee /etc/apt/sources.list.d/mullvad.list
+	apt update && apt install -y mullvad-browser
+
+	### VS CODE
+	wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+	install -D -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/microsoft.gpg
+	rm -f microsoft.gpg
+	echo "Types: deb
+URIs: https://packages.microsoft.com/repos/code
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/microsoft.gpg" > /etc/apt/sources.list.d/vscode.sources
+	apt update && apt install -y code
+
 	### VIRTUAL BOX
 	echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | tee /etc/apt/sources.list.d/vbox.list > /dev/null
 	wget --inet4-only --https-only -qO- https://www.virtualbox.org/download/oracle_vbox_2016.asc | gpg --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg --dearmor
 	apt update && apt install -y virtualbox-7.0 linux-headers-amd64 linux-headers-$(uname -r)
 
 	### ZOOM
-	echo "#!/bin/bash
-wget --inet4-only --https-only https://zoom.us/client/latest/zoom_amd64.deb
-apt install -y ./zoom_amd64.deb
-rm -rf ./zoom_amd64.deb" > /usr/bin/installer-zoom
+    cat << 'EOF' | tee /usr/bin/installer-zoom > /dev/null
+#!/bin/bash
+URL_="https://zoom.us/client/latest/zoom_amd64.deb"
+if wget --quiet --spider "$URL_"; then
+	echo " ... Installing lastest Zoom .deb file ... "
+    wget --quiet --inet4-only --https-only $URL_
+    apt install -qq -y ./zoom_amd64.deb
+    rm -rf ./zoom_amd64.deb
+else
+    echo "Error $URL_ not found."
+fi
+EOF
 	chmod +x /usr/bin/installer-zoom
 	bash /usr/bin/installer-zoom
 
-	mkdir -v -p /opt/songs
-	touch /opt/songs/SONG{001..102}.flac
-	
+	    ### GHIDRA
+    cat << 'EOF' | tee /usr/bin/installer-ghidra > /dev/null
+#!/bin/bash
+URL_=$(curl --silent "https://api.github.com/repos/NationalSecurityAgency/ghidra/releases/latest" | jq -r '(.assets[].browser_download_url)')
+if wget --quiet --spider "$URL_"; then
+    rm -rf /opt/apps/ghidra/
+	rm -rf /usr/bin/ghidra
+    rm -rf ghidra*
+	wget --inet4-only --https-only --quiet $URL_ -O ghidra.zip
+	unzip -q ghidra.zip
+	rm -rf ghidra.zip
+	mv ghidra_* /opt/third-apps/ghidra
+	ln -sf /opt/apps/ghidra/ghidraRun /usr/bin/ghidra
+	rm -rf /opt/apps/ghidra/ghidraRun.bat
+    echo "[Desktop Entry]
+Categories=Application;Development;
+Comment[en_US]=Ghidra Software Reverse Engineering Suite
+Comment=Ghidra Software Reverse Engineering Suite
+Exec=/opt/apps/ghidra/ghidraRun
+GenericName[en_US]=Ghidra Software Reverse Engineering Suite
+GenericName=Ghidra Software Reverse Engineering Suite
+Icon=/opt/apps/ghidra/docs/images/GHIDRA_1.png
+MimeType=
+Name[en_US]=Ghidra
+Name=Ghidra
+Path=/opt/apps/ghidra
+StartupNotify=false
+Terminal=false
+TerminalOptions=
+Type=Application
+Version=1.0
+X-DBUS-ServiceName=
+X-DBUS-StartupType=none
+X-KDE-SubstituteUID=false
+X-KDE-Username=" > /usr/share/applications/ghidra.desktop
+else
+    echo "Error ghidra file not found."
+fi
+EOF
+	chmod +x /usr/bin/installer-ghidra
+	bash /usr/bin/installer-ghidra
+
 	### YOUTUBE DOWNLOADER
-	apt purge -y yt-dlp
+    cat << 'EOF' | tee /usr/bin/installer-yt-dlp > /dev/null
+#!/bin/bash
+URL_="https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp"
+if wget --quiet --spider "$URL_"; then
+    apt purge -y yt-dlp
 	rm -rf /opt/apps/yt-*
 	rm -rf /usr/bin/yt-*
 	mkdir -v -p /opt/apps/
-	wget --inet4-only --https-only https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O /opt/apps/yt-dlp
+    wget --inet4-only --https-only --quiet https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O /opt/apps/yt-dlp
 	chmod 755 /opt/apps/yt-dlp
 	ln -sf /opt/apps/yt-dlp /usr/bin/yt-dlp
+else
+    echo "yt-dlp file not found."
+fi
+EOF
+	chmod +x /usr/bin/installer-yt-dlp
+	bash /usr/bin/installer-yt-dlp
+
+	### NMAP
+	cat << 'EOF' | tee /usr/bin/installer-nmap > /dev/null
+PWD_=$(pwd)
+SOURCE_CODE_=$(curl -s https://nmap.org/download | grep tar.bz2 | head -n 1 | cut -d " " -f 3)
+URL_="https://nmap.org/dist/$SOURCE_CODE_"
+if wget --quiet --spider "$URL_"; then
+	apt purge -y nmap*
+	rm -rf /opt/apps/nmap*
+	rm -rf /usr/bin/nmap
+	rm -rf /usr/bin/ncat
+	rm -rf /usr/bin/nping
+	wget --inet4-only --https-only $URL_
+	apt update
+	apt install -y python3-pip gcc g++ make liblua5.4-dev libssl-dev libssh2-1-dev libtool-bin
+	mkdir -p -v /opt/apps/nmap-suite
+	tar xjf $SOURCE_CODE_
+	rm -rf $SOURCE_CODE_
+	cd nmap-*
+	./configure --quiet --prefix=/opt/apps/nmap-suite -without-zenmap --without-ndiff #--without-nping --without-ncat
+	make -j 2
+	make install
+	ln -sf /opt/apps/nmap-suite/bin/nmap /usr/bin/nmap
+	ln -sf /opt/apps/nmap-suite/bin/ncat /usr/bin/ncat
+	ln -sf /opt/apps/nmap-suite/bin/nping /usr/bin/nping
+else
+	echo "Nmap source code 404."
+fi
+apt purge -y python3-pip libssl-dev libssh2-1-dev libtool-bin #liblua5.4-dev
+apt autopurge -y
+cd $PWD_
+rm -rf nmap*
+EOF
+	chmod +x /usr/bin/installer-nmap
+	bash /usr/bin/installer-nmap
 	
 	### SQLMAP
 	apt purge -y sqlmap*
@@ -285,19 +419,81 @@ rm -rf ./zoom_amd64.deb" > /usr/bin/installer-zoom
 	ln -sf /opt/apps/sqlmap-dev/sqlmap.py /usr/bin/sqlmap
 	
 	### FFMPEG
-	echo "#!/bin/bash
-rm -rf /opt/apps/ffmpeg*
-rm -rf /usr/bin/master-ff*
-mkdir -v -p /opt/apps/
-wget --inet4-only --https-only https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
-tar xf ffmpeg-master-latest-linux64-gpl.tar.xz
-rm -rf ffmpeg-master-latest-linux64-gpl.tar.xz
-mv ffmpeg-master-latest-linux64-gpl /opt/apps
-ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffmpeg /usr/bin/master-ffmpeg
-ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffplay /usr/bin/master-ffplay
-ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffprobe /usr/bin/master-ffprobe" > /usr/bin/installer-ffmpeg-master
+    cat << 'EOF' | tee /usr/bin/installer-ffmpeg-master > /dev/null
+#!/bin/bash
+URL_="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz"
+if wget --quiet --spider "$URL_"; then
+    rm -rf /opt/apps/ffmpeg*
+    rm -rf /usr/bin/master-ff*
+    mkdir -v -p /opt/apps/
+    wget --inet4-only --https-only $URL_
+    tar xf ffmpeg-master-latest-linux64-gpl.tar.xz
+    rm -rf ffmpeg-master-latest-linux64-gpl.tar.xz
+    mv ffmpeg-master-latest-linux64-gpl /opt/apps
+    ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffmpeg /usr/bin/master-ffmpeg
+    ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffplay /usr/bin/master-ffplay
+    ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffprobe /usr/bin/master-ffprobe
+else
+    echo "Error ffmpeg-master-latest-linux64-gpl.tar.xz file not found."
+fi
+EOF
 	chmod +x /usr/bin/installer-ffmpeg-master
 	bash /usr/bin/installer-ffmpeg-master
+
+	### Android SDK Platform-Tools - adb and fastboot
+	cat << 'EOF' | tee /usr/bin/installer-android-tools > /dev/null
+#!/bin/bash
+URL_="https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
+if wget --quiet --spider "$URL_"; then
+	rm -rf /opt/apps/platform-tools*
+	rm -rf /usr/bin/adb
+	rm -rf /usr/bin/fastboot
+	wget --inet4-only --https-only $URL_
+	unzip platform-tools-latest-linux.zip
+	rm -rf platform-tools-latest-linux.zip
+	mv platform-tools /opt/apps
+	ln -sf /opt/apps/platform-tools/adb /usr/bin/adb
+	ln -sf /opt/apps/platform-tools/fastboot /usr/bin/fastboot
+else
+	echo "Error $URL_ not found"
+fi
+EOF
+	chmod +x /usr/bin/installer-android-tools
+	bash /usr/bin/installer-android-tools
+
+	### GO LANGUAGE
+	cat << 'EOF' | tee /usr/bin/installer-go > /dev/null
+ARCH="amd64"
+OS="linux"
+GO_URL_BASE="https://go.dev/dl"
+LATEST_VERSION=$(curl -s 'https://go.dev/VERSION?m=text' | head -n 1)
+FILE="$LATEST_VERSION.$OS-$ARCH.tar.gz"
+URL="$GO_URL_BASE/$FILE"
+if wget --quiet --spider "$URL"; then
+	wget --inet4-only --https-only -O "$FILE" "$URL"
+	rm -rf /usr/local/go
+	rm -rf /opt/apps/go
+	tar -C /opt/apps -xzf "$FILE"
+	rm -rf "$FILE"
+	if ! grep -q "export PATH=\"\$PATH:/opt/apps/go/bin\"" /etc/profile; then
+		echo "export PATH=\$PATH:/opt/apps/go/bin" | tee /etc/profile.d/go-path.sh > /dev/null
+		echo "Ruta de Go agregada a /etc/profile.d/go-path.sh para todos los usuarios."
+	else
+		echo "La ruta de Go ya está configurada en /etc/profile.d/go-path.sh."
+	fi
+	echo "Go $VERSION installed successfully!"
+else
+	echo "Error: Could not retrieve the latest Go version."
+fi
+EOF
+	chmod +x /usr/bin/installer-go
+	bash /usr/bin/installer-go
+
+	###
+	chown -R tomas:tomas /opt/apps/*
+
+	mkdir -v -p /opt/songs
+	touch /opt/songs/SONG{001..102}.flac
 
 	### OFFICIAL DEBIAN PACKAGES
 	apt update
@@ -328,4 +524,6 @@ _flatpak
 _cookie_fortune
 
 /usr/bin/cookie-fortune
+
+
 
