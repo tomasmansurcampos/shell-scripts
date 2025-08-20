@@ -209,11 +209,12 @@ systemctl restart stubby.service" > /usr/bin/dnssb
 	### FASTFETCH
     cat << 'EOF' | tee /usr/bin/installer-fastfetch-cli > /dev/null
 #!/bin/bash
-URL_="https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.deb"
-if [[ `wget --inet4-only --https-only --server-response --spider $URL_ 2>&1 | grep '200 OK'` ]]; then
-    wget --inet4-only --https-only $URL_
-    apt install -y ./fastfetch-linux-amd64.deb
-    rm -rf ./fastfetch-linux-amd64.deb
+URL="https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.deb"
+FILE=$(basename "$URL")
+if wget --quiet --spider "$URL"; then
+    wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
+    apt install -y "./$FILE"
+	rm -f "$FILE"
 else
     echo "Error fastfetch-linux-amd64.deb file not found."
 fi
@@ -226,7 +227,7 @@ EOF
 	
 	### QBITTORRENT-NOX
 	adduser --system --group qbittorrent-nox
-	adduser tomas qbittorrent-nox
+	adduser some qbittorrent-nox
 	echo "[Unit]
 Description=qBittorrent Command Line Client
 After=network.target
@@ -275,18 +276,34 @@ Pin-Priority: 1000
 	### GOOGLE CHROME
 	cat << 'EOF' | tee /usr/bin/installer-google-chrome > /dev/null
 #!/bin/bash
-URL_="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
-CHROME_DEB_FILE="google-chrome-stable_current_amd64.deb"
-if wget --quiet --spider "$URL_"; then
-    wget --inet4-only --https-only --show-progress -q "$URL_" -O "$CHROME_DEB_FILE"
-    apt install -y "./$CHROME_DEB_FILE"
+URL="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
+FILE=$(basename "$URL")
+if wget --quiet --spider "$URL"; then
+    wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
+    apt install -y "./$FILE"
+	rm -f "$FILE"
 else
     echo "Error: Fallo en la instalación de Google Chrome." >&2
 fi
-rm -f "$CHROME_DEB_FILE"
 EOF
 	chmod +x /usr/bin/installer-google-chrome
 	bash /usr/bin/installer-google-chrome
+
+	### GOOGLE EARTH
+	cat << 'EOF' | tee /usr/bin/installer-google-earth > /dev/null
+#!/bin/bash
+URL="https://dl.google.com/dl/earth/client/current/google-earth-pro-stable_current_amd64.deb"
+FILE=$(basename "$URL")
+if wget --quiet --spider "$URL"; then
+	wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
+	apt install -y "./$FILE"
+	rm -f "$FILE"
+else
+    echo "Error: Fallo en la instalación de Google Earth." >&2
+fi
+EOF
+	chmod +x /usr/bin/installer-google-earth
+	bash /usr/bin/installer-google-earth
 
 	### MULLVAD
 	curl -fsSLo /usr/share/keyrings/mullvad-keyring.asc https://repository.mullvad.net/deb/mullvad-keyring.asc
@@ -313,14 +330,14 @@ Signed-By: /usr/share/keyrings/microsoft.gpg" > /etc/apt/sources.list.d/vscode.s
 	### ZOOM
     cat << 'EOF' | tee /usr/bin/installer-zoom > /dev/null
 #!/bin/bash
-URL_="https://zoom.us/client/latest/zoom_amd64.deb"
-if wget --quiet --spider "$URL_"; then
-	echo " ... Installing lastest Zoom .deb file ... "
-    wget --quiet --inet4-only --https-only $URL_
-    apt install -y ./zoom_amd64.deb
-    rm -rf ./zoom_amd64.deb
+URL="https://zoom.us/client/latest/zoom_amd64.deb"
+FILE=$(basename "$URL")
+if wget --quiet --spider "$URL"; then
+	wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
+	apt install -y "./$FILE"
+	rm -f "$FILE"
 else
-    echo "Error $URL_ not found."
+    echo "Error $URL not found."
 fi
 EOF
 	chmod +x /usr/bin/installer-zoom
@@ -330,15 +347,15 @@ EOF
 	cat << 'EOF' | tee /usr/bin/installer-jdk > /dev/null
 #!/bin/bash
 LATEST_JDK_=$(curl --silent https://jdk.java.net/ | grep 'Ready for use' | sed -E 's/.*href="\/([0-9]+)\/.*/\1/')
-URL_=$(curl -s https://jdk.java.net/$LATEST_JDK_/ | grep linux-x64_bin.tar.gz | sed -E 's/.*href="([^"]+)".*/\1/' | head -n 1)
-BUILD_VERSION_=$(echo $URL_ | sed -E 's/.*\/jdk([0-9]+\.[0-9]+\.[0-9]+)\/.*/\1/')
-FILE_=$(basename $URL_)
-if wget --quiet --spider "$URL_"; then
+URL=$(curl -s https://jdk.java.net/$LATEST_JDK_/ | grep linux-x64_bin.tar.gz | sed -E 's/.*href="([^"]+)".*/\1/' | head -n 1)
+BUILD_VERSION_=$(echo $URL | sed -E 's/.*\/jdk([0-9]+\.[0-9]+\.[0-9]+)\/.*/\1/')
+FILE=$(basename $URL)
+if wget --quiet --spider "$URL"; then
     rm -rf /opt/apps/jdk*
-    wget --inet4-only --https-only $URL_
-    tar xf "$FILE_"
+    wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
+    tar xf "$FILE"
     mv jdk-$BUILD_VERSION_ /opt/apps/
-    rm -rf "$FILE_"
+    rm -rf "$FILE"
     JAVA_HOME_PATH="/opt/apps/jdk-$BUILD_VERSION_"
     export JAVA_HOME="$JAVA_HOME_PATH"
     export PATH="$PATH:$JAVA_HOME/bin"
@@ -360,17 +377,17 @@ EOF
 	### GHIDRA
     cat << 'EOF' | tee /usr/bin/installer-ghidra > /dev/null
 #!/bin/bash
-URL_=$(curl --silent "https://api.github.com/repos/NationalSecurityAgency/ghidra/releases/latest" | jq -r '.assets[] | select(.name | endswith(".zip")) | .browser_download_url' | head -n 1)
-FILE_=$(basename "$URL_")
-DIR_NAME_="${FILE_%.zip}"
-UNZIPPED_DIR_="${DIR_NAME_%_*}"
-if wget --quiet --spider "$URL_"; then
+URL=$(curl --silent "https://api.github.com/repos/NationalSecurityAgency/ghidra/releases/latest" | jq -r '.assets[] | select(.name | endswith(".zip")) | .browser_download_url' | head -n 1)
+FILE=$(basename "$URL")
+DIR_NAME="${FILE%.zip}"
+UNZIPPED_DIR_="${DIR_NAME%_*}"
+if wget --quiet --spider "$URL"; then
     rm -rf /opt/apps/ghidra* # Esto eliminará tanto /opt/apps/ghidra como la versión nueva
     rm -f /usr/bin/ghidra
     rm -f ghidra*.zip
-    wget --inet4-only --https-only -O "$FILE_" "$URL_"
-    unzip -q "$FILE_" -d /opt/apps
-    rm -f "$FILE_"
+    wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
+    unzip -q "$FILE" -d /opt/apps
+    rm -f "$FILE"
     ln -sf "/opt/apps/$UNZIPPED_DIR_/ghidraRun" /usr/bin/ghidra
     bash -c "echo '[Desktop Entry]
 Categories=Application;Development;
@@ -396,13 +413,13 @@ EOF
 	### YOUTUBE DOWNLOADER
     cat << 'EOF' | tee /usr/bin/installer-yt-dlp > /dev/null
 #!/bin/bash
-URL_="https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp"
-if wget --quiet --spider "$URL_"; then
+URL="https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp"
+if wget --quiet --spider "$URL"; then
     apt purge -y yt-dlp
 	rm -rf /opt/apps/yt-*
 	rm -rf /usr/bin/yt-*
 	mkdir -v -p /opt/apps/
-    wget --inet4-only --https-only --quiet https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O /opt/apps/yt-dlp
+    wget --inet4-only --https-only --show-progress -q "$URL" -O /opt/apps/yt-dlp
 	chmod 755 /opt/apps/yt-dlp
 	ln -sf /opt/apps/yt-dlp /usr/bin/yt-dlp
 else
@@ -428,7 +445,7 @@ if wget --quiet --spider "$URL"; then
 	apt update
 	apt install -y "${DEPS[@]}"
 	mkdir -p -v /opt/apps/nmap-suite
-	wget --inet4-only --https-only $URL
+	wget --inet4-only --https-only --show-progress -q "$URL" -O "$SOURCE_CODE_FILE"
 	tar xjf "$SOURCE_CODE_FILE"
 	rm -rf "$SOURCE_CODE_FILE"
 	EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name "nmap-*" -print -quit)
@@ -459,12 +476,12 @@ EOF
 	### FFMPEG
     cat << 'EOF' | tee /usr/bin/installer-ffmpeg-master > /dev/null
 #!/bin/bash
-URL_="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz"
-if wget --quiet --spider "$URL_"; then
+URL="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz"
+if wget --quiet --spider "$URL"; then
     rm -rf /opt/apps/ffmpeg*
     rm -rf /usr/bin/master-ff*
     mkdir -v -p /opt/apps/
-    wget --inet4-only --https-only $URL_
+    wget --inet4-only --https-only --show-progress -q "$URL"
     tar xf ffmpeg-master-latest-linux64-gpl.tar.xz
     rm -rf ffmpeg-master-latest-linux64-gpl.tar.xz
     mv ffmpeg-master-latest-linux64-gpl /opt/apps
@@ -481,20 +498,19 @@ EOF
 	### Android SDK Platform-Tools - adb and fastboot
 	cat << 'EOF' | tee /usr/bin/installer-android-tools > /dev/null
 #!/bin/bash
-URL_="https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
-FILE_=$(basename $URL_)
-if wget --quiet --spider "$URL_"; then
+URL="https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
+FILE=$(basename "$URL")
+if wget --quiet --spider "$URL"; then
 	rm -rf /opt/apps/platform-tools*
-	rm -rf /usr/bin/adb
-	rm -rf /usr/bin/fastboot
-	wget --inet4-only --https-only $URL_
-	unzip "$FILE_"
-	rm -rf "$FILE_"
+	rm -rf /usr/bin/adb /usr/bin/fastboot
+	wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
+	unzip "$FILE"
+	rm -rf "$FILE"
 	mv platform-tools /opt/apps
 	ln -sf /opt/apps/platform-tools/adb /usr/bin/adb
 	ln -sf /opt/apps/platform-tools/fastboot /usr/bin/fastboot
 else
-	echo "Error $URL_ not found"
+	echo "Error $URL not found"
 fi
 EOF
 	chmod +x /usr/bin/installer-android-tools
@@ -510,7 +526,7 @@ LATEST_VERSION=$(curl -s 'https://go.dev/VERSION?m=text' | head -n 1)
 FILE="$LATEST_VERSION.$OS-$ARCH.tar.gz"
 URL="$GO_URL_BASE/$FILE"
 if wget --quiet --spider "$URL"; then
-	wget --inet4-only --https-only -O "$FILE" "$URL"
+	wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
 	rm -rf /usr/local/go
 	rm -rf /opt/apps/go
 	tar -C /opt/apps -xzf "$FILE"
@@ -530,7 +546,7 @@ EOF
 	bash /usr/bin/installer-go
 
 	###
-	chown -R tomas:tomas /opt/apps/*
+	chown -R some:some /opt/apps/*
 
 	mkdir -v -p /opt/songs
 	touch /opt/songs/SONG{001..102}.flac
@@ -545,18 +561,18 @@ _cookie_fortune()
 	## https://stackoverflow.com/questions/414164/how-can-i-select-random-files-from-a-directory-in-bash
 	apt update
 	apt install -y cowsay fortunes
-	cat << EOF > /usr/bin/cookie-fortune
+	cat << 'EOF' | tee /usr/bin/cookie-fortune > /dev/null
 #!/bin/bash
 main_()
 {
-    CHARACTER_=\$(ls /usr/share/cowsay/cows/ | shuf -n 1)
-    fortune -s | cowsay -f \$CHARACTER_
+	CHARACTER_=$(ls /usr/share/cowsay/cows/ | shuf -n 1)
+	fortune -s | cowsay -f $CHARACTER_
 }
 main_
-exit 0
 EOF
+    rm -rf /usr/share/applications/fortune.desktop
 	chmod 755 /usr/bin/cookie-fortune
-	rm -rf /usr/share/applications/fortune.desktop
+    bash /usr/bin/cookie-fortune
 }
 
 _main
