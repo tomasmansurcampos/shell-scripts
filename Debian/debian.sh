@@ -1,6 +1,7 @@
 #!/bin/bash
+_ESSENTIAL_PACKAGES="build-essential gcc gcc-doc gdb stubby wget tcpdump elinks nala software-properties-common ca-certificates lm-sensors fancontrol curl lsb-release htop bmon locales-all hello-traditional ascii ipcalc nmap ncat sipcalc jq autoconf flex texinfo help2man gawk libtool-bin libncurses-dev"
 
-_PACKAGES="flatpak qbittorrent-nox keepassxc fwupd bleachbit python-is-python3 rar unrar zip unzip p7zip-full p7zip-rar gnome-disk-utility audacity flac ffmpeg bpm-tools sox spek gnupg git make binutils geany gcc gcc-doc picard clementine"
+_PACKAGES="flatpak qbittorrent-nox keepassxc fwupd bleachbit python-is-python3 rar unrar zip unzip p7zip-full p7zip-rar gnome-disk-utility audacity flac ffmpeg bpm-tools sox spek gnupg git make binutils geany picard clementine"
 
 _UNDESIRED_PACKAGES="firefox-esr firefox* synaptic vlc vlc-bin vlc-data smplayer smtube mpv qps quassel meteo-qt audacious popularity-contest evolution qbittorrent quodlibet parole exfalso yelp seahorse totem cheese" #malcontent
 
@@ -94,7 +95,7 @@ deb http://debian.web.trex.fi/debian/ $(lsb_release -cs)-updates main contrib no
 
 	### BASIC PACKAGES TO GET LETS START.
 	apt update
-	apt install -y keepassxc stubby wget tcpdump elinks nala software-properties-common ca-certificates lm-sensors fancontrol curl lsb-release htop bmon locales-all hello-traditional ascii ipcalc nmap ncat sipcalc #jq
+	apt install -y $_ESSENTIAL_PACKAGES
 
 	### STUBBY DOT SERVERS CONFIGURATION
 	systemctl stop stubby.service
@@ -272,9 +273,20 @@ Pin-Priority: 1000
 	apt update && apt install -y firefox
 
 	### GOOGLE CHROME
-	wget --inet4-only --https-only https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-	apt install -y ./google-chrome-stable_current_amd64.deb
-	rm -rf ./google-chrome-stable_current_amd64.deb
+	cat << 'EOF' | tee /usr/bin/installer-google-chrome > /dev/null
+#!/bin/bash
+URL_="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
+CHROME_DEB_FILE="google-chrome-stable_current_amd64.deb"
+if wget --quiet --spider "$URL_"; then
+    wget --inet4-only --https-only --show-progress -q "$URL_" -O "$CHROME_DEB_FILE"
+    apt install -y "./$CHROME_DEB_FILE"
+else
+    echo "Error: Fallo en la instalación de Google Chrome." >&2
+fi
+rm -f "$CHROME_DEB_FILE"
+EOF
+	chmod +x /usr/bin/installer-google-chrome
+	bash /usr/bin/installer-google-chrome
 
 	### MULLVAD
 	curl -fsSLo /usr/share/keyrings/mullvad-keyring.asc https://repository.mullvad.net/deb/mullvad-keyring.asc
@@ -305,7 +317,7 @@ URL_="https://zoom.us/client/latest/zoom_amd64.deb"
 if wget --quiet --spider "$URL_"; then
 	echo " ... Installing lastest Zoom .deb file ... "
     wget --quiet --inet4-only --https-only $URL_
-    apt install -qq -y ./zoom_amd64.deb
+    apt install -y ./zoom_amd64.deb
     rm -rf ./zoom_amd64.deb
 else
     echo "Error $URL_ not found."
@@ -318,26 +330,29 @@ EOF
 	cat << 'EOF' | tee /usr/bin/installer-jdk > /dev/null
 #!/bin/bash
 LATEST_JDK_=$(curl --silent https://jdk.java.net/ | grep 'Ready for use' | sed -E 's/.*href="\/([0-9]+)\/.*/\1/')
-URL_=$(curl -s https://jdk.java.net/$LATEST_JDK_/ | grep linux-x64_bin.tar.gz | head -n 1 | sed -E 's/.*href="([^"]+)".*/\1/')
+URL_=$(curl -s https://jdk.java.net/$LATEST_JDK_/ | grep linux-x64_bin.tar.gz | sed -E 's/.*href="([^"]+)".*/\1/' | head -n 1)
 BUILD_VERSION_=$(echo $URL_ | sed -E 's/.*\/jdk([0-9]+\.[0-9]+\.[0-9]+)\/.*/\1/')
 FILE_=$(basename $URL_)
 if wget --quiet --spider "$URL_"; then
     rm -rf /opt/apps/jdk*
-	wget --inet4-only --https-only $URL_
-	tar xf $FILE_
-	mv jdk-$BUILD_VERSION_ /opt/apps/
-	rm -rf $FILE_
-    echo "export JAVA_HOME=/opt/apps/jdk-$BUILD_VERSION_" | tee /etc/profile.d/jdk-path.sh > /dev/null
-	echo "export PATH=\$PATH:/opt/apps/jdk-$BUILD_VERSION_/bin" | tee -a /etc/profile.d/jdk-path.sh > /dev/null
-    echo "export CLASSPATH=.:/opt/apps/jdk-$BUILD_VERSION_/lib" | tee -a /etc/profile.d/jdk-path.sh > /dev/null
-	echo "Ruta de Open JDK agregada a /etc/profile.d/jdk-path.sh para todos los usuarios."
-	echo "export JAVA_HOME=/opt/apps/jdk-$BUILD_VERSION_" | tee /etc/environment.d/java-home.conf > /dev/null
-	echo "Ruta de Open JDK agregada a /etc/environment.d/java-home.conf para todos los usuarios."
-	update-alternatives --install /usr/bin/java java /opt/apps/jdk-$BUILD_VERSION_/bin/java 100
-	update-alternatives --install /usr/bin/javac javac /opt/apps/jdk-$BUILD_VERSION_/bin/javac 100
+    wget --inet4-only --https-only $URL_
+    tar xf "$FILE_"
+    mv jdk-$BUILD_VERSION_ /opt/apps/
+    rm -rf "$FILE_"
+    JAVA_HOME_PATH="/opt/apps/jdk-$BUILD_VERSION_"
+    export JAVA_HOME="$JAVA_HOME_PATH"
+    export PATH="$PATH:$JAVA_HOME/bin"
+    export CLASSPATH=".:$JAVA_HOME/lib"
+    echo "export JAVA_HOME=$JAVA_HOME_PATH" | tee /etc/profile.d/jdk-path.sh > /dev/null
+    echo "export PATH=\$PATH:$JAVA_HOME/bin" | tee -a /etc/profile.d/jdk-path.sh > /dev/null
+    echo "export CLASSPATH=.:$JAVA_HOME/lib" | tee -a /etc/profile.d/jdk-path.sh > /dev/null
+    echo "Ruta de Open JDK agregada a /etc/profile.d/jdk-path.sh para todos los usuarios."
+    update-alternatives --install /usr/bin/java java "$JAVA_HOME/bin/java" 100
+    update-alternatives --install /usr/bin/javac javac "$JAVA_HOME/bin/javac" 100
 else
-	echo "Error Open JDK not avaliable."
+    echo "Error Open JDK not avaliable."
 fi
+
 EOF
 	chmod +x /usr/bin/installer-jdk
 	bash /usr/bin/installer-jdk
@@ -345,38 +360,32 @@ EOF
 	### GHIDRA
     cat << 'EOF' | tee /usr/bin/installer-ghidra > /dev/null
 #!/bin/bash
-URL_=$(curl --silent "https://api.github.com/repos/NationalSecurityAgency/ghidra/releases/latest" | jq -r '(.assets[].browser_download_url)')
+URL_=$(curl --silent "https://api.github.com/repos/NationalSecurityAgency/ghidra/releases/latest" | jq -r '.assets[] | select(.name | endswith(".zip")) | .browser_download_url' | head -n 1)
+FILE_=$(basename "$URL_")
+DIR_NAME_="${FILE_%.zip}"
+UNZIPPED_DIR_="${DIR_NAME_%_*}"
 if wget --quiet --spider "$URL_"; then
-    rm -rf /opt/apps/ghidra/
-	rm -rf /usr/bin/ghidra
-    rm -rf ghidra*
-	wget --inet4-only --https-only --quiet $URL_ -O ghidra.zip
-	unzip -q ghidra.zip
-	rm -rf ghidra.zip
-	mv ghidra_* /opt/third-apps/ghidra
-	ln -sf /opt/apps/ghidra/ghidraRun /usr/bin/ghidra
-	rm -rf /opt/apps/ghidra/ghidraRun.bat
-    echo "[Desktop Entry]
+    rm -rf /opt/apps/ghidra* # Esto eliminará tanto /opt/apps/ghidra como la versión nueva
+    rm -f /usr/bin/ghidra
+    rm -f ghidra*.zip
+    wget --inet4-only --https-only -O "$FILE_" "$URL_"
+    unzip -q "$FILE_" -d /opt/apps
+    rm -f "$FILE_"
+    ln -sf "/opt/apps/$UNZIPPED_DIR_/ghidraRun" /usr/bin/ghidra
+    bash -c "echo '[Desktop Entry]
 Categories=Application;Development;
-Comment[en_US]=Ghidra Software Reverse Engineering Suite
 Comment=Ghidra Software Reverse Engineering Suite
-Exec=/opt/apps/ghidra/ghidraRun
-GenericName[en_US]=Ghidra Software Reverse Engineering Suite
+Exec=/opt/apps/$UNZIPPED_DIR_/ghidraRun
 GenericName=Ghidra Software Reverse Engineering Suite
-Icon=/opt/apps/ghidra/docs/images/GHIDRA_1.png
+Icon=/opt/apps/$UNZIPPED_DIR_/docs/images/GHIDRA_1.png
 MimeType=
-Name[en_US]=Ghidra
 Name=Ghidra
-Path=/opt/apps/ghidra
+Path=/opt/apps/$UNZIPPED_DIR_
 StartupNotify=false
 Terminal=false
 TerminalOptions=
 Type=Application
-Version=1.0
-X-DBUS-ServiceName=
-X-DBUS-StartupType=none
-X-KDE-SubstituteUID=false
-X-KDE-Username=" > /usr/share/applications/ghidra.desktop
+Version=1.0' > /usr/share/applications/ghidra.desktop"
 else
     echo "Error ghidra file not found."
 fi
@@ -405,35 +414,36 @@ EOF
 
 	### NMAP
 	cat << 'EOF' | tee /usr/bin/installer-nmap > /dev/null
-PWD_=$(pwd)
-SOURCE_CODE_=$(curl -s https://nmap.org/download | grep tar.bz2 | head -n 1 | cut -d " " -f 3)
-URL_="https://nmap.org/dist/$SOURCE_CODE_"
-if wget --quiet --spider "$URL_"; then
+#!/bin/bash
+CURRENT_DIR=$(pwd)
+SOURCE_CODE_FILE=$(curl -s https://nmap.org/download | grep tar.bz2 | head -n 1 | cut -d " " -f 3)
+URL="https://nmap.org/dist/$SOURCE_CODE_FILE"
+INSTALL_DIR="/opt/apps/nmap-suite"
+DEPS=(python3-pip gcc g++ make liblua5.4-dev libssl-dev libssh2-1-dev libtool-bin)
+CLEANUP_DEPS=(python3-pip libssl-dev libssh2-1-dev libtool-bin)
+if wget --quiet --spider "$URL"; then
 	apt purge -y nmap*
-	rm -rf /opt/apps/nmap*
-	rm -rf /usr/bin/nmap
-	rm -rf /usr/bin/ncat
-	rm -rf /usr/bin/nping
-	wget --inet4-only --https-only $URL_
+	rm -rf "$INSTALL_DIR"
+	rm -rf /usr/bin/nmap /usr/bin/ncat /usr/bin/nping /usr/bin/zenmap /usr/bin/ndiff
 	apt update
-	apt install -y python3-pip gcc g++ make liblua5.4-dev libssl-dev libssh2-1-dev libtool-bin
+	apt install -y "${DEPS[@]}"
 	mkdir -p -v /opt/apps/nmap-suite
-	tar xjf $SOURCE_CODE_
-	rm -rf $SOURCE_CODE_
-	cd nmap-*
-	./configure --quiet --prefix=/opt/apps/nmap-suite -without-zenmap --without-ndiff #--without-nping --without-ncat
+	wget --inet4-only --https-only $URL
+	tar xjf "$SOURCE_CODE_FILE"
+	rm -rf "$SOURCE_CODE_FILE"
+	EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name "nmap-*" -print -quit)
+	cd "$EXTRACTED_DIR"
+	./configure --quiet --prefix="$INSTALL_DIR" --without-zenmap --without-ndiff
 	make -j 2
 	make install
-	ln -sf /opt/apps/nmap-suite/bin/nmap /usr/bin/nmap
-	ln -sf /opt/apps/nmap-suite/bin/ncat /usr/bin/ncat
-	ln -sf /opt/apps/nmap-suite/bin/nping /usr/bin/nping
+	ln -sf "$INSTALL_DIR"/bin/nmap /usr/bin/nmap
+    ln -sf "$INSTALL_DIR"/bin/ncat /usr/bin/ncat
+    ln -sf "$INSTALL_DIR"/bin/nping /usr/bin/nping
 else
 	echo "Nmap source code 404."
 fi
-apt purge -y python3-pip libssl-dev libssh2-1-dev libtool-bin #liblua5.4-dev
-apt autopurge -y
-cd $PWD_
-rm -rf nmap*
+rm -rf "$CURRENT_DIR"/nmap-* "$SOURCE_CODE_FILE"
+cd "$CURRENT_DIR"
 EOF
 	chmod +x /usr/bin/installer-nmap
 	bash /usr/bin/installer-nmap
@@ -472,13 +482,14 @@ EOF
 	cat << 'EOF' | tee /usr/bin/installer-android-tools > /dev/null
 #!/bin/bash
 URL_="https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
+FILE_=$(basename $URL_)
 if wget --quiet --spider "$URL_"; then
 	rm -rf /opt/apps/platform-tools*
 	rm -rf /usr/bin/adb
 	rm -rf /usr/bin/fastboot
 	wget --inet4-only --https-only $URL_
-	unzip platform-tools-latest-linux.zip
-	rm -rf platform-tools-latest-linux.zip
+	unzip "$FILE_"
+	rm -rf "$FILE_"
 	mv platform-tools /opt/apps
 	ln -sf /opt/apps/platform-tools/adb /usr/bin/adb
 	ln -sf /opt/apps/platform-tools/fastboot /usr/bin/fastboot
@@ -491,6 +502,7 @@ EOF
 
 	### GO LANGUAGE
 	cat << 'EOF' | tee /usr/bin/installer-go > /dev/null
+#!/bin/bash
 ARCH="amd64"
 OS="linux"
 GO_URL_BASE="https://go.dev/dl"
@@ -552,3 +564,6 @@ _flatpak
 _cookie_fortune
 
 /usr/bin/cookie-fortune
+
+
+
