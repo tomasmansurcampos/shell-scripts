@@ -328,7 +328,7 @@ if wget --quiet --spider "$URL_"; then
 	mv jdk-$BUILD_VERSION_ /opt/apps/
 	rm -rf $FILE_
     echo "export JAVA_HOME=/opt/apps/jdk-$BUILD_VERSION_" | tee /etc/profile.d/jdk-path.sh > /dev/null
-	echo "export PATH=$PATH:/opt/apps/jdk-$BUILD_VERSION_/bin" | tee -a /etc/profile.d/jdk-path.sh > /dev/null
+	echo "export PATH=\$PATH:/opt/apps/jdk-$BUILD_VERSION_/bin" | tee -a /etc/profile.d/jdk-path.sh > /dev/null
     echo "export CLASSPATH=.:/opt/apps/jdk-$BUILD_VERSION_/lib" | tee -a /etc/profile.d/jdk-path.sh > /dev/null
 	echo "Ruta de Open JDK agregada a /etc/profile.d/jdk-path.sh para todos los usuarios."
 	echo "export JAVA_HOME=/opt/apps/jdk-$BUILD_VERSION_" | tee /etc/environment.d/java-home.conf > /dev/null
@@ -552,6 +552,3 @@ _flatpak
 _cookie_fortune
 
 /usr/bin/cookie-fortune
-
-
-
