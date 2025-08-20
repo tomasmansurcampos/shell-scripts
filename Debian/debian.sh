@@ -333,8 +333,8 @@ if wget --quiet --spider "$URL_"; then
 	echo "Ruta de Open JDK agregada a /etc/profile.d/jdk-path.sh para todos los usuarios."
 	echo "export JAVA_HOME=/opt/apps/jdk-$BUILD_VERSION_" | tee /etc/environment.d/java-home.conf > /dev/null
 	echo "Ruta de Open JDK agregada a /etc/environment.d/java-home.conf para todos los usuarios."
-	update-alternatives --install /usr/bin/java java /opt/apps/jdk-$BUILD_VERSION_/bin/java 0
-	update-alternatives --install /usr/bin/javac javac /opt/apps/jdk-$BUILD_VERSION_/bin/javac 0
+	update-alternatives --install /usr/bin/java java /opt/apps/jdk-$BUILD_VERSION_/bin/java 100
+	update-alternatives --install /usr/bin/javac javac /opt/apps/jdk-$BUILD_VERSION_/bin/javac 100
 else
 	echo "Error Open JDK not avaliable."
 fi
