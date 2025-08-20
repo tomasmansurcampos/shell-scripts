@@ -225,7 +225,7 @@ EOF
 	
 	### QBITTORRENT-NOX
 	adduser --system --group qbittorrent-nox
-	adduser some qbittorrent-nox
+	adduser tomas qbittorrent-nox
 	echo "[Unit]
 Description=qBittorrent Command Line Client
 After=network.target
@@ -314,7 +314,35 @@ EOF
 	chmod +x /usr/bin/installer-zoom
 	bash /usr/bin/installer-zoom
 
-	    ### GHIDRA
+	### OFFICIAL OPEN JDK
+	cat << 'EOF' | tee /usr/bin/installer-jdk > /dev/null
+#!/bin/bash
+LATEST_JDK_=$(curl --silent https://jdk.java.net/ | grep 'Ready for use' | sed -E 's/.*href="\/([0-9]+)\/.*/\1/')
+URL_=$(curl -s https://jdk.java.net/$LATEST_JDK_/ | grep linux-x64_bin.tar.gz | head -n 1 | sed -E 's/.*href="([^"]+)".*/\1/')
+BUILD_VERSION_=$(echo $URL_ | sed -E 's/.*\/jdk([0-9]+\.[0-9]+\.[0-9]+)\/.*/\1/')
+FILE_=$(basename $URL_)
+if wget --quiet --spider "$URL_"; then
+    rm -rf /opt/apps/jdk*
+	wget --inet4-only --https-only $URL_
+	tar xf $FILE_
+	mv jdk-$BUILD_VERSION_ /opt/apps/
+	rm -rf $FILE_
+    echo "export JAVA_HOME=/opt/apps/jdk-$BUILD_VERSION_" | tee /etc/profile.d/jdk-path.sh > /dev/null
+	echo "export PATH=$PATH:/opt/apps/jdk-$BUILD_VERSION_/bin" | tee -a /etc/profile.d/jdk-path.sh > /dev/null
+    echo "export CLASSPATH=.:/opt/apps/jdk-$BUILD_VERSION_/lib" | tee -a /etc/profile.d/jdk-path.sh > /dev/null
+	echo "Ruta de Open JDK agregada a /etc/profile.d/jdk-path.sh para todos los usuarios."
+	echo "export JAVA_HOME=/opt/apps/jdk-$BUILD_VERSION_" | tee /etc/environment.d/java-home.conf > /dev/null
+	echo "Ruta de Open JDK agregada a /etc/environment.d/java-home.conf para todos los usuarios."
+	update-alternatives --install /usr/bin/java java /opt/apps/jdk-$BUILD_VERSION_/bin/java 0
+	update-alternatives --install /usr/bin/javac javac /opt/apps/jdk-$BUILD_VERSION_/bin/javac 0
+else
+	echo "Error Open JDK not avaliable."
+fi
+EOF
+	chmod +x /usr/bin/installer-jdk
+	bash /usr/bin/installer-jdk
+
+	### GHIDRA
     cat << 'EOF' | tee /usr/bin/installer-ghidra > /dev/null
 #!/bin/bash
 URL_=$(curl --silent "https://api.github.com/repos/NationalSecurityAgency/ghidra/releases/latest" | jq -r '(.assets[].browser_download_url)')
@@ -490,7 +518,7 @@ EOF
 	bash /usr/bin/installer-go
 
 	###
-	chown -R some:some /opt/apps/*
+	chown -R tomas:tomas /opt/apps/*
 
 	mkdir -v -p /opt/songs
 	touch /opt/songs/SONG{001..102}.flac
