@@ -2,7 +2,7 @@
 
 ESSENTIAL_PACKAGES="build-essential dnsutils kpcli man fwupd gnupg gcc gcc-doc nasm gdb python-is-python3 stubby curl wget jq git make binutils tcpdump lynx screen nala lm-sensors fancontrol lsb-release htop bmon locales-all ascii ipcalc sipcalc rar unrar zip unzip p7zip p7zip-full p7zip-rar ffmpeg sox flac"
 
-PACKAGES="flatpak keepassxc keepass2 putty bleachbit gnome-disk-utility vlc audacity spek geany"
+PACKAGES="keepassxc keepass2 putty bleachbit gnome-disk-utility vlc audacity spek geany"
 
 UNWANTED_PACKAGES="firefox-esr firefox* synaptic smtube qps quassel meteo-qt audacious popularity-contest evolution qbittorrent quodlibet parole exfalso yelp seahorse totem cheese" #malcontent
 
@@ -15,6 +15,8 @@ OPENBOX="openbox menu obconf lightdm xfce4-terminal network-manager kpcli nnn pc
 _flatpak()
 {
 	#apt purge flatpak -y && rm -rf /var/lib/flatpak/ && rm -rf /home/*/.cache/flatpak/ && rm -rf /home/*/.local/share/flatpak/ && rm -rf /home/*/.var/app/* && rm -rf /root/.local/share/flatpak/
+
+	apt update && apt install --reinstall -y flatpak
 
 	flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
