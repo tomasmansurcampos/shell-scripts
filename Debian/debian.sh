@@ -1,5 +1,6 @@
 #!/bin/bash
-ESSENTIAL_PACKAGES="ntpsec systemd-timesyncd build-essential dnsutils kpcli man fwupd gnupg gcc gcc-doc gdb python-is-python3 stubby curl wget jq git make binutils tcpdump lynx screen nala lm-sensors fancontrol lsb-release htop bmon locales-all ascii ipcalc sipcalc rar unrar zip unzip p7zip p7zip-full p7zip-rar ffmpeg sox flac"
+
+ESSENTIAL_PACKAGES="build-essential dnsutils kpcli man fwupd gnupg gcc gcc-doc gdb python-is-python3 stubby curl wget jq git make binutils tcpdump lynx screen nala lm-sensors fancontrol lsb-release htop bmon locales-all ascii ipcalc sipcalc rar unrar zip unzip p7zip p7zip-full p7zip-rar ffmpeg sox flac"
 
 PACKAGES="flatpak keepassxc keepass2 putty bleachbit gnome-disk-utility vlc audacity spek geany"
 
@@ -9,7 +10,7 @@ INTEL_THINGS="intel-microcode iucode-tool *nvidia* firmware-intel* intel-media-v
 
 GNOME_THINGS="gnome-games* gnome-weather gnome-software-common gnome-boxes gnome-system-monitor rhythmbox transmission-common gnome-games gnome-clocks zutty gnome-characters debian-reference-common gnome-sound-recorder gnome-connections gnome-music gnome-weather gnome-calculator gnome-calendar gnome-contacts gnome-maps" #gnome-tour libreoffice*
 
-OPENBOX="openbox menu pbconf lightdm xfce4-terminal network-manager kpcli nnn"
+OPENBOX="openbox menu obconf lightdm xfce4-terminal network-manager kpcli nnn pcmanfm"
 
 _flatpak()
 {
@@ -115,10 +116,6 @@ EOF
 	### BASIC PACKAGES TO GET LETS START.
 	apt update
 	apt install -y $ESSENTIAL_PACKAGES
-	
-	### TIME ZONE CORDOBA ARGENTINA
-	#timedatectl set-timezone America/Argentina/Cordoba
-	#systemctl restart systemd-timesyncd.service
 }
 
 _networking()
@@ -234,29 +231,21 @@ systemctl restart stubby.service
 EOF
 	chmod +x /usr/bin/dnssb
 
-	### TIME SERVER CONFIG
-	# timedatectl show-timesync | grep ServerName
-	#time.google.com
-	#216.239.35.0 216.239.35.4 216.239.35.8 216.239.35.12
-	#0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org
-	#1.ar.pool.ntp.org 2.south-america.pool.ntp.org 3.south-america.pool.ntp.org
-	#Servicio de Hidrografía Naval República Argentina:
-	#ntp2.hidro.gob.ar
-	#Ministerio de Defensa República Argentina:
-	#ntp.ign.gob.ar
-	#0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org
-	cp -v /etc/systemd/timesyncd.conf /etc/systemd/.timesyncd.conf.original
-	cat <<"EOF" > /etc/systemd/timesyncd.conf
-[Time]
-NTP=0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org
-FallbackNTP=
-RootDistanceMaxSec=5
-PollIntervalMinSec=32
-PollIntervalMaxSec=2048
-ConnectionRetrySec=30
-SaveIntervalSec=60
+	### NTP ENCRYPTED
+	apt update && apt install -y ntpsec
+	systemctl stop ntpsec.service
+	cp -v /etc/ntpsec/ntp.conf /etc/ntpsec/.ntp.conf.original
+	cat <<"EOF" > /etc/ntpsec/ntp.conf
+driftfile /var/lib/ntpsec/ntp.drift
+leapfile /usr/share/zoneinfo/leap-seconds.list
+tos maxclock 11
+tos minclock 4 minsane 3
+server time.cloudflare.com nts
+restrict default kod nomodify nopeer noquery limited
+restrict 127.0.0.1
+restrict ::1
 EOF
-	systemctl restart systemd-timesyncd.service
+	systemctl restart ntpsec.service
 }
 
 _debian_desktop()
@@ -383,7 +372,7 @@ _daily_desktop()
 	### QBITTORRENT-NOX
 	apt install -y qbittorrent-nox
 	adduser --system --group qbittorrent-nox
-	adduser tomas qbittorrent-nox
+	adduser someone qbittorrent-nox
 	cat <<"EOF" > /etc/systemd/system/qbittorrent-nox.service
 [Unit]
 Description=qBittorrent Command Line Client
@@ -757,7 +746,7 @@ EOF
 	systemctl stop ollama
 
 	###
-	chown -R tomas:tomas /opt/apps/*
+	chown -R someone:someone /opt/apps/*
 
 	mkdir -v -p /opt/songs
 	touch /opt/songs/SONG{001..102}.flac
