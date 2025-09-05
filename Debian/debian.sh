@@ -1,7 +1,7 @@
 #!/bin/bash
-ESSENTIAL_PACKAGES="build-essential systemd-timesyncd dnsutils kpcli man fwupd gnupg gcc gcc-doc gdb python-is-python3 stubby wget git make binutils tcpdump elinks lynx nala ca-certificates lm-sensors fancontrol curl lsb-release htop bmon locales-all ascii ipcalc sipcalc jq rar unrar zip unzip p7zip p7zip-full p7zip-rar"
+ESSENTIAL_PACKAGES="ntpsec systemd-timesyncd build-essential dnsutils kpcli man fwupd gnupg gcc gcc-doc gdb python-is-python3 stubby curl wget jq git make binutils tcpdump lynx screen nala lm-sensors fancontrol lsb-release htop bmon locales-all ascii ipcalc sipcalc rar unrar zip unzip p7zip p7zip-full p7zip-rar ffmpeg sox flac"
 
-PACKAGES="keepassxc keepass2 putty flatpak bleachbit gnome-disk-utility vlc audacity flac ffmpeg sox spek geany"
+PACKAGES="flatpak keepassxc keepass2 putty bleachbit gnome-disk-utility vlc audacity spek geany"
 
 UNWANTED_PACKAGES="firefox-esr firefox* synaptic smtube qps quassel meteo-qt audacious popularity-contest evolution qbittorrent quodlibet parole exfalso yelp seahorse totem cheese" #malcontent
 
@@ -9,7 +9,7 @@ INTEL_THINGS="intel-microcode iucode-tool *nvidia* firmware-intel* intel-media-v
 
 GNOME_THINGS="gnome-games* gnome-weather gnome-software-common gnome-boxes gnome-system-monitor rhythmbox transmission-common gnome-games gnome-clocks zutty gnome-characters debian-reference-common gnome-sound-recorder gnome-connections gnome-music gnome-weather gnome-calculator gnome-calendar gnome-contacts gnome-maps" #gnome-tour libreoffice*
 
-OPENBOX="openbox menu pbconf lightdm kpcli nnn network-manager xfce4-terminal screen lynx dnsutils tcpdump curl wget git gcc htop bmon neofetch ffmpeg sox flac pcmanfm keepass2 keepassxc putty"
+OPENBOX="openbox menu pbconf lightdm xfce4-terminal network-manager kpcli nnn"
 
 _flatpak()
 {
@@ -108,28 +108,17 @@ EOF
 	rm -f /etc/apt/sources.list~
 	apt autoclean && apt clean && rm -rf /var/lib/apt/lists/* && apt clean
 
+	### EMACS NOX NO EXIM4 SERVER
+	apt update
+	apt install --no-install-recommends -y emacs-nox
+
 	### BASIC PACKAGES TO GET LETS START.
 	apt update
-	apt install --install-recommends -y $ESSENTIAL_PACKAGES
+	apt install -y $ESSENTIAL_PACKAGES
 	
 	### TIME ZONE CORDOBA ARGENTINA
-	timedatectl set-timezone America/Argentina/Cordoba
-	systemctl restart systemd-timesyncd.service
-
-	### LIQUORIX KERNEL
-	curl -s "https://liquorix.net/liquorix-keyring.gpg" | gpg --batch --yes --output /etc/apt/keyrings/liquorix-keyring.gpg --dearmor
-	chmod 0644 /etc/apt/keyrings/liquorix-keyring.gpg
-	cat <<EOF > /etc/apt/sources.list.d/liquorix.sources
-Types: deb deb-src
-URIs: https://liquorix.net/debian
-Suites: $(lsb_release -cs)
-Components: main
-Architectures: amd64
-Signed-By: /etc/apt/keyrings/liquorix-keyring.gpg
-EOF
-	apt update
-	apt install --install-recommends -y linux-image-liquorix-amd64 linux-headers-liquorix-amd64
-
+	#timedatectl set-timezone America/Argentina/Cordoba
+	#systemctl restart systemd-timesyncd.service
 }
 
 _networking()
@@ -259,8 +248,8 @@ EOF
 	cp -v /etc/systemd/timesyncd.conf /etc/systemd/.timesyncd.conf.original
 	cat <<"EOF" > /etc/systemd/timesyncd.conf
 [Time]
-NTP=time.google.com
-FallbackNTP=216.239.35.0 216.239.35.4 216.239.35.8 216.239.35.12
+NTP=0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org
+FallbackNTP=
 RootDistanceMaxSec=5
 PollIntervalMinSec=32
 PollIntervalMaxSec=2048
@@ -275,6 +264,39 @@ _debian_desktop()
 	### OFFICIAL DEBIAN PACKAGES
 	apt update
 	apt install -y $PACKAGES
+	
+	### LIQUORIX KERNEL
+	curl -s "https://liquorix.net/liquorix-keyring.gpg" | gpg --batch --yes --output /etc/apt/keyrings/liquorix-keyring.gpg --dearmor
+	chmod 0644 /etc/apt/keyrings/liquorix-keyring.gpg
+	cat <<EOF > /etc/apt/sources.list.d/liquorix.sources
+Types: deb deb-src
+URIs: https://liquorix.net/debian
+Suites: $(lsb_release -cs)
+Components: main
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/liquorix-keyring.gpg
+EOF
+	apt update
+	#apt install --install-recommends -y linux-image-liquorix-amd64 linux-headers-liquorix-amd64
+
+	### TOR BROWSER
+	cat <<"EOF" > /usr/bin/installer-tor-browser
+#!/bin/bash
+LINK="https://www.torproject.org"
+TOR_BROWSER_LINK=$(curl -s "$LINK"/download/ | grep -oP 'href="/dist/torbrowser/[^"]*"' | grep 'linux-x86_64' | sed 's/href="\///' | sed 's/"//' | head -n 1)
+URL="$LINK"/"$TOR_BROWSER_LINK"
+FILE=$(basename "$URL")
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
+    wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
+    tar xf "$FILE"
+    mv -v tor-browser/ /opt/apps
+    rm -rf "$FILE"
+else
+    echo "Error $URL not found."
+fi
+EOF
+	chmod +x /usr/bin/installer-tor-browser
+	bash /usr/bin/installer-tor-browser
 
 	### GOOGLE CHROME
 	cat <<"EOF" > /usr/bin/installer-google-chrome
@@ -291,7 +313,40 @@ fi
 EOF
 	chmod +x /usr/bin/installer-google-chrome
 	bash /usr/bin/installer-google-chrome
-	
+
+	### FIREFOX
+	#apt update && apt install --install-recommends -y firefox-esr
+	apt purge -y firefox* && rm -rf /home/*/.mozilla && rm -rf /home/*/.cache/mozilla
+	install -d -m 0755 /etc/apt/keyrings
+	wget --inet4-only --https-only -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
+	gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc | awk '/pub/{getline; gsub(/^ +| +$/,""); if($0 == "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3") print "\nThe key fingerprint matches ("$0").\n"; else print "\nVerification failed: the fingerprint ("$0") does not match the expected one.\n"}'
+	cat <<EOF > /etc/apt/sources.list.d/mozilla.sources
+Types: deb
+URIs: https://packages.mozilla.org/apt
+Suites: mozilla
+Components: main
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/packages.mozilla.org.asc
+EOF
+	cat <<EOF > /etc/apt/preferences.d/mozilla
+Package: *
+Pin: origin packages.mozilla.org
+Pin-Priority: 1000
+EOF
+	apt update && apt install -y firefox
+
+	### VIRTUAL BOX
+	wget --inet4-only --https-only -qO- https://www.virtualbox.org/download/oracle_vbox_2016.asc | gpg --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg --dearmor
+	cat <<EOF > /etc/apt/sources.list.d/vbox.sources
+Types: deb
+URIs: https://download.virtualbox.org/virtualbox/debian
+Suites: $(lsb_release -cs)
+Components: contrib
+Architectures: amd64
+Signed-By: /usr/share/keyrings/oracle-virtualbox-2016.gpg
+EOF
+	apt update && apt install --install-recomends -y virtualbox-7.2 linux-headers-amd64 linux-headers-$(uname -r)
+
 	### VSCODE
 	wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
 	install -D -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/microsoft.gpg
@@ -393,27 +448,6 @@ EOF
 	systemctl stop tor.service
 	systemctl disable tor.service
 
-	### FIREFOX
-	#apt update && apt install --install-recommends -y firefox-esr
-	apt purge -y firefox* && rm -rf /home/*/.mozilla && rm -rf /home/*/.cache/mozilla
-	install -d -m 0755 /etc/apt/keyrings
-	wget --inet4-only --https-only -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
-	gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc | awk '/pub/{getline; gsub(/^ +| +$/,""); if($0 == "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3") print "\nThe key fingerprint matches ("$0").\n"; else print "\nVerification failed: the fingerprint ("$0") does not match the expected one.\n"}'
-	cat <<EOF > /etc/apt/sources.list.d/mozilla.sources
-Types: deb
-URIs: https://packages.mozilla.org/apt
-Suites: mozilla
-Components: main
-Architectures: amd64
-Signed-By: /etc/apt/keyrings/packages.mozilla.org.asc
-EOF
-	cat <<EOF > /etc/apt/preferences.d/mozilla
-Package: *
-Pin: origin packages.mozilla.org
-Pin-Priority: 1000
-EOF
-	apt update && apt install -y firefox
-
 	### WASABI
 	cat <<"EOF" > /usr/bin/installer-wasabi
 #!/bin/bash
@@ -429,25 +463,6 @@ fi
 EOF
 	chmod +x /usr/bin/installer-wasabi
 	bash /usr/bin/installer-wasabi
-
-	### TOR BROWSER
-	cat <<"EOF" > /usr/bin/installer-tor-browser
-#!/bin/bash
-LINK="https://www.torproject.org"
-TOR_BROWSER_LINK=$(curl -s "$LINK"/download/ | grep -oP 'href="/dist/torbrowser/[^"]*"' | grep 'linux-x86_64' | sed 's/href="\///' | sed 's/"//' | head -n 1)
-URL="$LINK"/"$TOR_BROWSER_LINK"
-FILE=$(basename "$URL")
-if wget --inet4-only --https-only --quiet --spider "$URL"; then
-    wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
-    tar xf "$FILE"
-    mv -v tor-browser/ /opt/apps
-    rm -rf "$FILE"
-else
-    echo "Error $URL not found."
-fi
-EOF
-	chmod +x /usr/bin/installer-tor-browser
-	bash /usr/bin/installer-tor-browser
 
 	### GOOGLE EARTH
 	cat <<"EOF" > /usr/bin/installer-google-earth
@@ -483,18 +498,6 @@ EOF
 	apt update
 	apt install -y steam-installer
 	apt install -y mesa-vulkan-drivers libglx-mesa0:i386 mesa-vulkan-drivers:i386 libgl1-mesa-dri:i386
-
-	### VIRTUAL BOX
-	wget --inet4-only --https-only -qO- https://www.virtualbox.org/download/oracle_vbox_2016.asc | gpg --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg --dearmor
-	cat <<EOF > /etc/apt/sources.list.d/vbox.sources
-Types: deb
-URIs: https://download.virtualbox.org/virtualbox/debian
-Suites: $(lsb_release -cs)
-Components: contrib
-Architectures: amd64
-Signed-By: /usr/share/keyrings/oracle-virtualbox-2016.gpg
-EOF
-	apt update && apt install --install-recomends -y virtualbox-7.2 linux-headers-amd64 linux-headers-$(uname -r)
 
 	### ZOOM
     cat <<"EOF" > /usr/bin/installer-zoom
@@ -769,14 +772,14 @@ _cookie_fortune()
 CHARACTER=$(ls /usr/share/cowsay/cows/ | shuf -n 1)
 fortune -s | cowsay -f $CHARACTER
 EOF
-    rm -rf /usr/share/applications/fortune.desktop
+	rm -rf /usr/share/applications/fortune.desktop
 	chmod 755 /usr/bin/cookie-fortune
-    bash /usr/bin/cookie-fortune
+	bash /usr/bin/cookie-fortune
 }
 
 _basic_setup
 _networking
-_debian_desktop
+#_debian_desktop
 #_daily_desktop
 #_flatpak
 _cookie_fortune
