@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ESSENTIAL_PACKAGES="build-essential dnsutils kpcli man fwupd gnupg gcc gcc-doc gdb python-is-python3 stubby curl wget jq git make binutils tcpdump lynx screen nala lm-sensors fancontrol lsb-release htop bmon locales-all ascii ipcalc sipcalc rar unrar zip unzip p7zip p7zip-full p7zip-rar ffmpeg sox flac"
+ESSENTIAL_PACKAGES="build-essential dnsutils kpcli man fwupd gnupg gcc gcc-doc nasm gdb python-is-python3 stubby curl wget jq git make binutils tcpdump lynx screen nala lm-sensors fancontrol lsb-release htop bmon locales-all ascii ipcalc sipcalc rar unrar zip unzip p7zip p7zip-full p7zip-rar ffmpeg sox flac"
 
 PACKAGES="flatpak keepassxc keepass2 putty bleachbit gnome-disk-utility vlc audacity spek geany"
 
@@ -104,7 +104,7 @@ Components: main contrib non-free non-free-firmware
 Enabled: yes
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 EOF
-	mv -v /etc/apt/sources.list /etc/apt/.sources.list.originalll
+	mv -v /etc/apt/sources.list /etc/apt/.sources.list.original
 	rm -f /etc/apt/sources.list
 	rm -f /etc/apt/sources.list~
 	apt autoclean && apt clean && rm -rf /var/lib/apt/lists/* && apt clean
@@ -243,7 +243,7 @@ tos minclock 4 minsane 3
 server time.cloudflare.com nts
 restrict default kod nomodify nopeer noquery limited
 restrict 127.0.0.1
-restrict ::1
+#restrict ::1
 EOF
 	systemctl restart ntpsec.service
 }
