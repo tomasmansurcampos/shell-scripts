@@ -2,7 +2,7 @@
 
 ESSENTIAL_PACKAGES="build-essential dnsutils kpcli man fwupd gnupg gcc gcc-doc nasm gdb python-is-python3 stubby curl wget jq git make binutils tcpdump lynx screen nala lm-sensors fancontrol lsb-release htop bmon locales-all ascii ipcalc sipcalc rar unrar zip unzip p7zip p7zip-full p7zip-rar ffmpeg sox flac"
 
-PACKAGES="keepassxc keepass2 putty bleachbit gnome-disk-utility vlc audacity spek geany"
+PACKAGES="keepassxc keepass2 putty bleachbit gnome-disk-utility vlc audacity spek"
 
 UNWANTED_PACKAGES="firefox-esr firefox* synaptic smtube qps quassel meteo-qt audacious popularity-contest evolution qbittorrent quodlibet parole exfalso yelp seahorse totem cheese" #malcontent
 
@@ -10,7 +10,7 @@ INTEL_THINGS="intel-microcode iucode-tool *nvidia* firmware-intel* intel-media-v
 
 GNOME_THINGS="gnome-games* gnome-weather gnome-software-common gnome-boxes gnome-system-monitor rhythmbox transmission-common gnome-games gnome-clocks zutty gnome-characters debian-reference-common gnome-sound-recorder gnome-connections gnome-music gnome-weather gnome-calculator gnome-calendar gnome-contacts gnome-maps" #gnome-tour libreoffice*
 
-OPENBOX="openbox menu obconf lightdm xfce4-terminal network-manager kpcli nnn pcmanfm"
+OPENBOX="openbox menu obconf lightdm xfce4-terminal network-manager kpcli nnn pcmanfm geany"
 
 _flatpak()
 {
@@ -122,6 +122,17 @@ EOF
 
 _networking()
 {
+
+	### DISABLING IPV6
+	cp -v /etc/sysctl.conf /etc/.sysctl.conf.original
+	cat <<"EOF" >> /etc/sysctl.conf
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+EOF
+	sysctl -p
+	systemctl restart procps.service
+
 	### STUBBY DOT SERVERS CONFIGURATION
 	systemctl stop stubby.service
 	cp -v /etc/stubby/stubby.yml /etc/stubby/stubby.yml.original
