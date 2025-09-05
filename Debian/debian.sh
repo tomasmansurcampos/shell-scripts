@@ -1,13 +1,15 @@
 #!/bin/bash
-_ESSENTIAL_PACKAGES="build-essential gcc gcc-doc gdb stubby wget tcpdump elinks nala software-properties-common ca-certificates lm-sensors fancontrol curl lsb-release htop bmon locales-all hello-traditional ascii ipcalc nmap ncat sipcalc jq autoconf flex texinfo help2man gawk libtool-bin libncurses-dev"
+ESSENTIAL_PACKAGES="build-essential systemd-timesyncd dnsutils kpcli man fwupd gnupg gcc gcc-doc gdb python-is-python3 stubby wget git make binutils tcpdump elinks lynx nala ca-certificates lm-sensors fancontrol curl lsb-release htop bmon locales-all ascii ipcalc sipcalc jq rar unrar zip unzip p7zip p7zip-full p7zip-rar"
 
-_PACKAGES="flatpak qbittorrent-nox keepassxc fwupd bleachbit python-is-python3 rar unrar zip unzip p7zip-full p7zip-rar gnome-disk-utility audacity flac ffmpeg bpm-tools sox spek gnupg git make binutils geany picard clementine"
+PACKAGES="keepassxc keepass2 putty flatpak bleachbit gnome-disk-utility vlc audacity flac ffmpeg sox spek geany"
 
-_UNDESIRED_PACKAGES="firefox-esr firefox* synaptic vlc vlc-bin vlc-data smplayer smtube mpv qps quassel meteo-qt audacious popularity-contest evolution qbittorrent quodlibet parole exfalso yelp seahorse totem cheese" #malcontent
+UNWANTED_PACKAGES="firefox-esr firefox* synaptic smtube qps quassel meteo-qt audacious popularity-contest evolution qbittorrent quodlibet parole exfalso yelp seahorse totem cheese" #malcontent
 
-_INTEL_SHIT="intel-microcode iucode-tool *nvidia* firmware-intel* intel-media-va-driver-non-free"
+INTEL_THINGS="intel-microcode iucode-tool *nvidia* firmware-intel* intel-media-va-driver-non-free"
 
-_GNOME_SHIT="gnome-games* gnome-weather gnome-software-common gnome-boxes gnome-system-monitor rhythmbox transmission-common gnome-games gnome-clocks zutty gnome-characters debian-reference-common gnome-sound-recorder gnome-connections gnome-music gnome-weather gnome-calculator gnome-calendar gnome-contacts gnome-maps" #gnome-tour libreoffice*
+GNOME_THINGS="gnome-games* gnome-weather gnome-software-common gnome-boxes gnome-system-monitor rhythmbox transmission-common gnome-games gnome-clocks zutty gnome-characters debian-reference-common gnome-sound-recorder gnome-connections gnome-music gnome-weather gnome-calculator gnome-calendar gnome-contacts gnome-maps" #gnome-tour libreoffice*
+
+OPENBOX="openbox menu pbconf lightdm kpcli nnn network-manager xfce4-terminal screen lynx dnsutils tcpdump curl wget git gcc htop bmon neofetch ffmpeg sox flac pcmanfm keepass2 keepassxc putty"
 
 _flatpak()
 {
@@ -43,7 +45,7 @@ _flatpak()
 	flatpak install -y flathub org.telegram.desktop
 	flatpak install -y flathub com.discordapp.Discord
 	#flatpak install -y flathub io.bassi.Amberol
-	#flatpak install -y flathub io.freetubeapp.FreeTube
+	flatpak install -y flathub io.freetubeapp.FreeTube
 	flatpak install -y flathub com.spotify.Client
 	#flatpak install -y flathub org.qbittorrent.qBittorrent
 	#flatpak install -y flathub com.warlordsoftwares.youtube-downloader-4ktube
@@ -55,53 +57,90 @@ _flatpak()
 	
 	flatpak update -y
 
-	chmod 755 /home/*/.local/share/flatpak
+	#chmod 755 /home/*/.local/share/flatpak
 }
 
-_main()
+_basic_setup()
 {
 	if [ "$EUID" -ne 0 ]
 	  then echo "Please run as root"
 	  exit
 	fi
 
-	cp /root/.bashrc /root/.bashrc.original
-	echo "export PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin" >> /root/.bashrc # this is IMPORTANT.
-	echo "alias apt-clean='apt autoclean && apt clean && rm -rf /var/lib/apt/lists/* && apt clean'" >> /root/.bashrc
+	cp -v /root/.bashrc /root/.bashrc.original
+	cat <<"EOF" >> /root/.bashrc # this is IMPORTANT.
+export PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin
+EOF
+	cat <<"EOF" >> /root/.bashrc
+alias apt-clean='apt autoclean && apt clean && rm -rf /var/lib/apt/lists/* && apt clean'
+EOF
 	source /root/.bashrc
 
+	mkdir -v -p /opt/apps
+	mkdir -v -p /usr/share/bg-wp
+
 	### PURGING SHIT
-	apt purge -y $_UNDESIRED_PACKAGES $_GNOME_SHIT $_INTEL_SHIT
-	apt autopurge -y
+	#apt purge -y $UNWANTED_PACKAGES $GNOME_THINGS $INTEL_THINGS
+	#apt autopurge -y
 	
 	### Disable Gnome Software from Startup Apps
-	rm -rf /etc/xdg/autostart/org.gnome.Software.desktop
+	#apt remove -y unattended-upgrades
+	#mv -v /etc/xdg/autostart/org.gnome.Software.desktop /etc/xdg/autostart/.org.gnome.Software.desktop
 
 	### BEST SOURCES LIST FILES EVER, REALLY. $(lsb_release -cs)
-	cp /etc/apt/sources.list /etc/apt/sources.list.original
+	cat <<EOF > /etc/apt/sources.list.d/debian.sources
+Types: deb deb-src
+URIs: http://debian.web.trex.fi/debian/
+Suites: $(lsb_release -cs) $(lsb_release -cs)-updates
+Components: main contrib non-free non-free-firmware
+Enabled: yes
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+Types: deb deb-src
+URIs: http://debian.web.trex.fi/debian-security
+Suites: $(lsb_release -cs)-security
+Components: main contrib non-free non-free-firmware
+Enabled: yes
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+EOF
+	mv -v /etc/apt/sources.list /etc/apt/.sources.list.originalll
+	rm -f /etc/apt/sources.list
+	rm -f /etc/apt/sources.list~
 	apt autoclean && apt clean && rm -rf /var/lib/apt/lists/* && apt clean
-	echo "deb http://debian.web.trex.fi/debian/ $(lsb_release -cs) main contrib non-free non-free-firmware
-#deb-src http://debian.web.trex.fi/debian/ $(lsb_release -cs) main contrib non-free non-free-firmware
-
-deb http://debian.web.trex.fi/debian-security $(lsb_release -cs)-security main contrib non-free non-free-firmware
-#deb-src http://debian.web.trex.fi/debian-security $(lsb_release -cs)-security main contrib non-free non-free-firmware
-
-deb http://debian.web.trex.fi/debian/ $(lsb_release -cs)-updates main contrib non-free non-free-firmware
-#deb-src http://debian.web.trex.fi/debian/ $(lsb_release -cs)-updates main contrib non-free non-free-firmware
-
-#deb http://debian.web.trex.fi/debian/ $(lsb_release -cs)-backports main contrib non-free non-free-firmware
-#deb-src http://debian.web.trex.fi/debian/ $(lsb_release -cs)-backports main contrib non-free non-free-firmware
-" > /etc/apt/sources.list
 
 	### BASIC PACKAGES TO GET LETS START.
 	apt update
-	apt install -y $_ESSENTIAL_PACKAGES
+	apt install --install-recommends -y $ESSENTIAL_PACKAGES
+	
+	### TIME ZONE CORDOBA ARGENTINA
+	timedatectl set-timezone America/Argentina/Cordoba
+	systemctl restart systemd-timesyncd.service
 
+	### LIQUORIX KERNEL
+	curl -s "https://liquorix.net/liquorix-keyring.gpg" | gpg --batch --yes --output /etc/apt/keyrings/liquorix-keyring.gpg --dearmor
+	chmod 0644 /etc/apt/keyrings/liquorix-keyring.gpg
+	cat <<EOF > /etc/apt/sources.list.d/liquorix.sources
+Types: deb deb-src
+URIs: https://liquorix.net/debian
+Suites: $(lsb_release -cs)
+Components: main
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/liquorix-keyring.gpg
+EOF
+	apt update
+	apt install --install-recommends -y linux-image-liquorix-amd64 linux-headers-liquorix-amd64
+
+}
+
+_networking()
+{
 	### STUBBY DOT SERVERS CONFIGURATION
 	systemctl stop stubby.service
-	cp /etc/stubby/stubby.yml /etc/stubby/stubby.yml.original
+	cp -v /etc/stubby/stubby.yml /etc/stubby/stubby.yml.original
+
 	### GOOGLE PUBLIC DNS
-	echo '### GOOGLE PUBLIC DNS
+	cat <<"EOF" > /etc/stubby/stubby.yml.google
+### GOOGLE PUBLIC DNS
 resolution_type: GETDNS_RESOLUTION_STUB
 dns_transport_list:
   - GETDNS_TRANSPORT_TLS
@@ -114,19 +153,22 @@ tls_min_version: GETDNS_TLS1_3
 tls_max_version: GETDNS_TLS1_3
 listen_addresses:
   - 127.0.0.3
-  - 0::1
+#  - 0::1
 #dnssec: GETDNS_EXTENSION_TRUE
 upstream_recursive_servers:
   - address_data: 8.8.8.8
     tls_auth_name: "dns.google"
   - address_data: 8.8.4.4
     tls_auth_name: "dns.google"
-  - address_data: 2001:4860:4860::8888
-    tls_auth_name: "dns.google"
-  - address_data: 2001:4860:4860::8844
-    tls_auth_name: "dns.google"' > /etc/stubby/stubby.yml.google
+#  - address_data: 2001:4860:4860::8888
+#    tls_auth_name: "dns.google"
+#  - address_data: 2001:4860:4860::8844
+#    tls_auth_name: "dns.google"
+EOF
+
 	### DNS.SB
-	echo '### DNS.SB
+	cat <<"EOF" > /etc/stubby/stubby.yml.dns.sb
+### DNS.SB
 resolution_type: GETDNS_RESOLUTION_STUB
 dns_transport_list:
   - GETDNS_TRANSPORT_TLS
@@ -139,7 +181,7 @@ tls_min_version: GETDNS_TLS1_3
 tls_max_version: GETDNS_TLS1_3
 listen_addresses:
   - 127.0.0.3
-  - 0::1
+#  - 0::1
 #dnssec: GETDNS_EXTENSION_TRUE
 upstream_recursive_servers:
   - address_data: 185.222.222.222
@@ -151,18 +193,57 @@ upstream_recursive_servers:
     tls_auth_name: "dot.sb"
     tls_pubkey_pinset:
       - digest: "sha256"
-        value: amEjS6OJ74LvhMNJBxN3HXxOMSWAriaFoyMQn/Nb5FU=' > /etc/stubby/stubby.yml.dns.sb
-	cp /etc/stubby/stubby.yml.google /etc/stubby/stubby.yml
+        value: amEjS6OJ74LvhMNJBxN3HXxOMSWAriaFoyMQn/Nb5FU=
+#- address_data: 2a09:0000:0000:0000:0000:0000:0000:0000
+#    tls_auth_name: "dot.sb"
+#    tls_pubkey_pinset:
+#      - digest: "sha256"
+#        value: amEjS6OJ74LvhMNJBxN3HXxOMSWAriaFoyMQn/Nb5FU=
+#  - address_data: 2a11:0000:0000:0000:0000:0000:0000:0000
+#    tls_auth_name: "dot.sb"
+#    tls_pubkey_pinset:
+#      - digest: "sha256"
+#        value: amEjS6OJ74LvhMNJBxN3HXxOMSWAriaFoyMQn/Nb5FU=
+EOF
+
+	cp -v /etc/stubby/stubby.yml.google /etc/stubby/stubby.yml
 	systemctl enable --now stubby.service
 	systemctl restart stubby.service
 
 	### STATIC RESOLV CONF FILE
-	cp /etc/resolv.conf /etc/resolv.conf.original
-	echo "nameserver ::1
+	cp -v /etc/resolv.conf /etc/resolv.conf.original
+	cat <<"EOF" > /etc/resolv.conf.stubby
 nameserver 127.0.0.3
-options trust-ad" > /etc/resolv.conf.stubby
-	cp /etc/resolv.conf.stubby /etc/resolv.conf
+options trust-ad
+EOF
+	cp -v /etc/resolv.conf.stubby /etc/resolv.conf
 	chattr +i /etc/resolv.conf
+
+	cp -v /etc/hosts /etc/hosts.original
+
+	### GOOGLE
+	cat <<"EOF" > /usr/bin/dnsgoogle
+#!/bin/bash
+chattr -i /etc/resolv.conf
+cp -v /etc/resolv.conf.stubby /etc/resolv.conf
+chattr +i /etc/resolv.conf
+cp -v /etc/hosts.original /etc/hosts
+cp -v /etc/stubby/stubby.yml.google /etc/stubby/stubby.yml
+systemctl restart stubby.service
+EOF
+	chmod +x /usr/bin/dnsgoogle
+	
+	### DNS.SB
+	cat <<"EOF" > /usr/bin/dnssb
+#!/bin/bash
+chattr -i /etc/resolv.conf
+cp -v /etc/resolv.conf.stubby /etc/resolv.conf
+chattr +i /etc/resolv.conf
+cp -v /etc/hosts.original /etc/hosts
+cp -v /etc/stubby/stubby.yml.dns.sb /etc/stubby/stubby.yml
+systemctl restart stubby.service
+EOF
+	chmod +x /usr/bin/dnssb
 
 	### TIME SERVER CONFIG
 	# timedatectl show-timesync | grep ServerName
@@ -175,60 +256,81 @@ options trust-ad" > /etc/resolv.conf.stubby
 	#Ministerio de Defensa República Argentina:
 	#ntp.ign.gob.ar
 	#0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org
-	cp /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.original
-	echo "[Time]
+	cp -v /etc/systemd/timesyncd.conf /etc/systemd/.timesyncd.conf.original
+	cat <<"EOF" > /etc/systemd/timesyncd.conf
+[Time]
 NTP=time.google.com
 FallbackNTP=216.239.35.0 216.239.35.4 216.239.35.8 216.239.35.12
 RootDistanceMaxSec=5
 PollIntervalMinSec=32
 PollIntervalMaxSec=2048
 ConnectionRetrySec=30
-SaveIntervalSec=60" > /etc/systemd/timesyncd.conf
+SaveIntervalSec=60
+EOF
 	systemctl restart systemd-timesyncd.service
+}
 
-	cp /etc/hosts /etc/hosts.original
-	### GOOGLE
-	echo "#!/bin/bash
-chattr -i /etc/resolv.conf
-cp /etc/resolv.conf.stubby /etc/resolv.conf
-chattr +i /etc/resolv.conf
-cp /etc/hosts.original /etc/hosts
-cp /etc/stubby/stubby.yml.google /etc/stubby/stubby.yml
-systemctl restart stubby.service" > /usr/bin/dnsgoogle
-	chmod +x /usr/bin/dnsgoogle
-	### DNS.SB
-	echo "#!/bin/bash
-chattr -i /etc/resolv.conf
-cp /etc/resolv.conf.stubby /etc/resolv.conf
-chattr +i /etc/resolv.conf
-cp /etc/hosts.original /etc/hosts
-cp /etc/stubby/stubby.yml.dns.sb /etc/stubby/stubby.yml
-systemctl restart stubby.service" > /usr/bin/dnssb
-	chmod +x /usr/bin/dnssb
+_debian_desktop()
+{
+	### OFFICIAL DEBIAN PACKAGES
+	apt update
+	apt install -y $PACKAGES
 
-	### FASTFETCH
-    cat << 'EOF' | tee /usr/bin/installer-fastfetch-cli > /dev/null
+	### GOOGLE CHROME
+	cat <<"EOF" > /usr/bin/installer-google-chrome
 #!/bin/bash
-URL="https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.deb"
+URL="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
 FILE=$(basename "$URL")
-if wget --quiet --spider "$URL"; then
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
     wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
     apt install -y "./$FILE"
 	rm -f "$FILE"
 else
-    echo "Error fastfetch-linux-amd64.deb file not found."
+    echo "Error $URL not found."
+fi
+EOF
+	chmod +x /usr/bin/installer-google-chrome
+	bash /usr/bin/installer-google-chrome
+	
+	### VSCODE
+	wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+	install -D -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/microsoft.gpg
+	rm -f microsoft.gpg
+	cat <<EOF > /etc/apt/sources.list.d/vscode.sources
+Types: deb
+URIs: https://packages.microsoft.com/repos/code
+Suites: stable
+Components: main
+Architectures: $(dpkg --print-architecture)
+Signed-By: /usr/share/keyrings/microsoft.gpg
+EOF
+	apt update && apt install -y code
+
+	### FASTFETCH
+    cat <<"EOF" > /usr/bin/installer-fastfetch-cli
+#!/bin/bash
+URL="https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.deb"
+FILE=$(basename "$URL")
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
+    wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
+    apt install -y "./$FILE"
+	rm -f "$FILE"
+else
+    echo "Error $URL not found."
 fi
 EOF
 	chmod +x /usr/bin/installer-fastfetch-cli
 	bash /usr/bin/installer-fastfetch-cli
+}
 
-	### LIQUORIX KERNEL
-	curl -s 'https://liquorix.net/install-liquorix.sh' | bash
-	
+_daily_desktop()
+{
 	### QBITTORRENT-NOX
+	apt install -y qbittorrent-nox
 	adduser --system --group qbittorrent-nox
-	adduser some qbittorrent-nox
-	echo "[Unit]
+	adduser tomas qbittorrent-nox
+	cat <<"EOF" > /etc/systemd/system/qbittorrent-nox.service
+[Unit]
 Description=qBittorrent Command Line Client
 After=network.target
 
@@ -241,23 +343,55 @@ ExecStart=/usr/bin/qbittorrent-nox -d --webui-port=8080
 Restart=on-failure
 
 [Install]
-WantedBy=multi-user.target" > /etc/systemd/system/qbittorrent-nox.service
+WantedBy=multi-user.target
+EOF
 	mkdir /opt/qbittorrent-nox
 	chown qbittorrent-nox:qbittorrent-nox /opt/qbittorrent-nox
 	usermod -d /opt/qbittorrent-nox qbittorrent-nox
 	systemctl daemon-reload
-	#systemctl start qbittorrent-nox
-	#systemctl enable qbittorrent-nox
+	systemctl start qbittorrent-nox
+	systemctl enable qbittorrent-nox
 	
 	### PACKET TRACER NO-NETWORK
-	echo "[Desktop Entry]
+	cat <<EOF > /usr/share/applications/packet-tracer-no-network.desktop
+[Desktop Entry]
 Type=Application
 Exec=unshare -rn /opt/pt/packettracer
 Name=PacsitoTreiser NO-NETWORK
 Icon=/opt/pt/art/app.png
 Terminal=false
 StartupNotify=true
-MimeType=application/x-pkt;application/x-pka;application/x-pkz;application/x-pks;application/x-pksz;" > /usr/share/applications/packet-tracer-no-network.desktop
+MimeType=application/x-pkt;application/x-pka;application/x-pkz;application/x-pks;application/x-pksz;
+EOF
+
+	### IVPN-UI
+	curl -fsSL https://repo.ivpn.net/stable/debian/generic.gpg | gpg --dearmor > ~/ivpn-archive-keyring.gpg
+	mv ~/ivpn-archive-keyring.gpg /usr/share/keyrings/ivpn-archive-keyring.gpg
+	chown root:root /usr/share/keyrings/ivpn-archive-keyring.gpg && chmod 644 /usr/share/keyrings/ivpn-archive-keyring.gpg
+	cat <<EOF > /etc/apt/sources.list.d/ivpn.sources
+Types: deb
+URIs: https://repo.ivpn.net/stable/debian
+Suites: ./generic
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/ivpn-archive-keyring.gpg
+EOF
+	chown root:root /etc/apt/sources.list.d/ivpn.sources && chmod 644 /etc/apt/sources.list.d/ivpn.sources
+	apt update && apt install -y ivpn-ui
+
+	### TOR
+	wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | tee /usr/share/keyrings/deb.torproject.org-keyring.gpg >/dev/null
+	cat <<EOF > /etc/apt/sources.list.d/tor.sources
+Types: deb
+URIs: https://deb.torproject.org/torproject.org
+Suites: $(lsb_release -cs)
+Components: main
+Architectures: $(dpkg --print-architecture)
+Signed-By: /usr/share/keyrings/deb.torproject.org-keyring.gpg
+EOF
+	apt update && apt install --install-recommends -y tor deb.torproject.org-keyring
+	systemctl stop tor.service
+	systemctl disable tor.service
 
 	### FIREFOX
 	#apt update && apt install --install-recommends -y firefox-esr
@@ -265,41 +399,68 @@ MimeType=application/x-pkt;application/x-pka;application/x-pkz;application/x-pks
 	install -d -m 0755 /etc/apt/keyrings
 	wget --inet4-only --https-only -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
 	gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc | awk '/pub/{getline; gsub(/^ +| +$/,""); if($0 == "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3") print "\nThe key fingerprint matches ("$0").\n"; else print "\nVerification failed: the fingerprint ("$0") does not match the expected one.\n"}'
-	echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | tee -a /etc/apt/sources.list.d/mozilla.list > /dev/null
-	echo '
+	cat <<EOF > /etc/apt/sources.list.d/mozilla.sources
+Types: deb
+URIs: https://packages.mozilla.org/apt
+Suites: mozilla
+Components: main
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/packages.mozilla.org.asc
+EOF
+	cat <<EOF > /etc/apt/preferences.d/mozilla
 Package: *
 Pin: origin packages.mozilla.org
 Pin-Priority: 1000
-' | tee /etc/apt/preferences.d/mozilla
+EOF
 	apt update && apt install -y firefox
 
-	### GOOGLE CHROME
-	cat << 'EOF' | tee /usr/bin/installer-google-chrome > /dev/null
+	### WASABI
+	cat <<"EOF" > /usr/bin/installer-wasabi
 #!/bin/bash
-URL="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
+URL=$(curl --silent "https://api.github.com/repos/WalletWasabi/WalletWasabi/releases/latest" | grep browser_download_url | grep ".deb" | head -n 1 | cut -d '"' -f 4)
 FILE=$(basename "$URL")
-if wget --quiet --spider "$URL"; then
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
     wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
     apt install -y "./$FILE"
 	rm -f "$FILE"
 else
-    echo "Error: Fallo en la instalación de Google Chrome." >&2
+    echo "Error $URL not found."
 fi
 EOF
-	chmod +x /usr/bin/installer-google-chrome
-	bash /usr/bin/installer-google-chrome
+	chmod +x /usr/bin/installer-wasabi
+	bash /usr/bin/installer-wasabi
+
+	### TOR BROWSER
+	cat <<"EOF" > /usr/bin/installer-tor-browser
+#!/bin/bash
+LINK="https://www.torproject.org"
+TOR_BROWSER_LINK=$(curl -s "$LINK"/download/ | grep -oP 'href="/dist/torbrowser/[^"]*"' | grep 'linux-x86_64' | sed 's/href="\///' | sed 's/"//' | head -n 1)
+URL="$LINK"/"$TOR_BROWSER_LINK"
+FILE=$(basename "$URL")
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
+    wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
+    tar xf "$FILE"
+    mv -v tor-browser/ /opt/apps
+    rm -rf "$FILE"
+else
+    echo "Error $URL not found."
+fi
+EOF
+	chmod +x /usr/bin/installer-tor-browser
+	bash /usr/bin/installer-tor-browser
 
 	### GOOGLE EARTH
-	cat << 'EOF' | tee /usr/bin/installer-google-earth > /dev/null
+	cat <<"EOF" > /usr/bin/installer-google-earth
 #!/bin/bash
 URL="https://dl.google.com/dl/earth/client/current/google-earth-pro-stable_current_amd64.deb"
 FILE=$(basename "$URL")
-if wget --quiet --spider "$URL"; then
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
 	wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
 	apt install -y "./$FILE"
 	rm -f "$FILE"
+	cp -v /opt/google/earth/pro/google-earth-pro.desktop /usr/share/applications/google-earth-pro.desktop
 else
-    echo "Error: Fallo en la instalación de Google Earth." >&2
+    echo "Error $URL not found."
 fi
 EOF
 	chmod +x /usr/bin/installer-google-earth
@@ -307,32 +468,40 @@ EOF
 
 	### MULLVAD
 	curl -fsSLo /usr/share/keyrings/mullvad-keyring.asc https://repository.mullvad.net/deb/mullvad-keyring.asc
-	echo "deb [signed-by=/usr/share/keyrings/mullvad-keyring.asc arch=$( dpkg --print-architecture )] https://repository.mullvad.net/deb/stable stable main" | tee /etc/apt/sources.list.d/mullvad.list
-	apt update && apt install -y mullvad-browser
-
-	### VS CODE
-	wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
-	install -D -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/microsoft.gpg
-	rm -f microsoft.gpg
-	echo "Types: deb
-URIs: https://packages.microsoft.com/repos/code
+	cat <<EOF > /etc/apt/sources.list.d/mullvad.sources
+Types: deb
+URIs: https://repository.mullvad.net/deb/stable
 Suites: stable
 Components: main
 Architectures: amd64
-Signed-By: /usr/share/keyrings/microsoft.gpg" > /etc/apt/sources.list.d/vscode.sources
-	apt update && apt install -y code
+Signed-By: /usr/share/keyrings/mullvad-keyring.asc
+EOF
+	apt update && apt install -y mullvad-browser
+
+	### STEAM
+	dpkg --add-architecture i386
+	apt update
+	apt install -y steam-installer
+	apt install -y mesa-vulkan-drivers libglx-mesa0:i386 mesa-vulkan-drivers:i386 libgl1-mesa-dri:i386
 
 	### VIRTUAL BOX
-	echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | tee /etc/apt/sources.list.d/vbox.list > /dev/null
 	wget --inet4-only --https-only -qO- https://www.virtualbox.org/download/oracle_vbox_2016.asc | gpg --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg --dearmor
-	apt update && apt install -y virtualbox-7.0 linux-headers-amd64 linux-headers-$(uname -r)
+	cat <<EOF > /etc/apt/sources.list.d/vbox.sources
+Types: deb
+URIs: https://download.virtualbox.org/virtualbox/debian
+Suites: $(lsb_release -cs)
+Components: contrib
+Architectures: amd64
+Signed-By: /usr/share/keyrings/oracle-virtualbox-2016.gpg
+EOF
+	apt update && apt install --install-recomends -y virtualbox-7.2 linux-headers-amd64 linux-headers-$(uname -r)
 
 	### ZOOM
-    cat << 'EOF' | tee /usr/bin/installer-zoom > /dev/null
+    cat <<"EOF" > /usr/bin/installer-zoom
 #!/bin/bash
 URL="https://zoom.us/client/latest/zoom_amd64.deb"
 FILE=$(basename "$URL")
-if wget --quiet --spider "$URL"; then
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
 	wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
 	apt install -y "./$FILE"
 	rm -f "$FILE"
@@ -342,21 +511,27 @@ fi
 EOF
 	chmod +x /usr/bin/installer-zoom
 	bash /usr/bin/installer-zoom
+	
+	### WINE-HQ
+	dpkg --add-architecture i386
+	wget -O - https://dl.winehq.org/wine-builds/winehq.key | gpg --dearmor -o /etc/apt/keyrings/winehq-archive.key -
+	wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/debian/dists/$(lsb_release -cs)/winehq-$(lsb_release -cs).sources
+	apt update && apt install --install-recommends -y winehq-devel
 
 	### OFFICIAL OPEN JDK
-	cat << 'EOF' | tee /usr/bin/installer-jdk > /dev/null
+	cat <<"EOF" > /usr/bin/installer-jdk
 #!/bin/bash
 LATEST_JDK_=$(curl --silent https://jdk.java.net/ | grep 'Ready for use' | sed -E 's/.*href="\/([0-9]+)\/.*/\1/')
 URL=$(curl -s https://jdk.java.net/$LATEST_JDK_/ | grep linux-x64_bin.tar.gz | sed -E 's/.*href="([^"]+)".*/\1/' | head -n 1)
-BUILD_VERSION_=$(echo $URL | sed -E 's/.*\/jdk([0-9]+\.[0-9]+\.[0-9]+)\/.*/\1/')
+BUILD_VERSION=$(echo $URL | sed -E 's/.*\/jdk([0-9]+\.[0-9]+\.[0-9]+)\/.*/\1/')
 FILE=$(basename $URL)
-if wget --quiet --spider "$URL"; then
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
     rm -rf /opt/apps/jdk*
     wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
     tar xf "$FILE"
-    mv jdk-$BUILD_VERSION_ /opt/apps/
+    mv jdk-$BUILD_VERSION /opt/apps/
     rm -rf "$FILE"
-    JAVA_HOME_PATH="/opt/apps/jdk-$BUILD_VERSION_"
+    JAVA_HOME_PATH="/opt/apps/jdk-$BUILD_VERSION"
     export JAVA_HOME="$JAVA_HOME_PATH"
     export PATH="$PATH:$JAVA_HOME/bin"
     export CLASSPATH=".:$JAVA_HOME/lib"
@@ -364,57 +539,56 @@ if wget --quiet --spider "$URL"; then
     echo "export PATH=\$PATH:$JAVA_HOME/bin" | tee -a /etc/profile.d/jdk-path.sh > /dev/null
     echo "export CLASSPATH=.:$JAVA_HOME/lib" | tee -a /etc/profile.d/jdk-path.sh > /dev/null
     echo "Ruta de Open JDK agregada a /etc/profile.d/jdk-path.sh para todos los usuarios."
-    update-alternatives --install /usr/bin/java java "$JAVA_HOME/bin/java" 100
-    update-alternatives --install /usr/bin/javac javac "$JAVA_HOME/bin/javac" 100
+    update-alternatives --install /usr/bin/java java "$JAVA_HOME/bin/java" 10033
+    update-alternatives --install /usr/bin/javac javac "$JAVA_HOME/bin/javac" 10033
 else
-    echo "Error Open JDK not avaliable."
+    echo "Error $URL not found."
 fi
-
 EOF
 	chmod +x /usr/bin/installer-jdk
 	bash /usr/bin/installer-jdk
 
 	### GHIDRA
-    cat << 'EOF' | tee /usr/bin/installer-ghidra > /dev/null
+    cat <<"EOF" >/usr/bin/installer-ghidra
 #!/bin/bash
 URL=$(curl --silent "https://api.github.com/repos/NationalSecurityAgency/ghidra/releases/latest" | jq -r '.assets[] | select(.name | endswith(".zip")) | .browser_download_url' | head -n 1)
 FILE=$(basename "$URL")
 DIR_NAME="${FILE%.zip}"
-UNZIPPED_DIR_="${DIR_NAME%_*}"
-if wget --quiet --spider "$URL"; then
-    rm -rf /opt/apps/ghidra* # Esto eliminará tanto /opt/apps/ghidra como la versión nueva
+UNZIPPED_DIR="${DIR_NAME%_*}"
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
+    rm -rf /opt/apps/ghidra*
     rm -f /usr/bin/ghidra
-    rm -f ghidra*.zip
+    rm -rf ghidra*.zip
     wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
     unzip -q "$FILE" -d /opt/apps
     rm -f "$FILE"
-    ln -sf "/opt/apps/$UNZIPPED_DIR_/ghidraRun" /usr/bin/ghidra
+    ln -sf "/opt/apps/$UNZIPPED_DIR/ghidraRun" /usr/bin/ghidra
     bash -c "echo '[Desktop Entry]
 Categories=Application;Development;
 Comment=Ghidra Software Reverse Engineering Suite
-Exec=/opt/apps/$UNZIPPED_DIR_/ghidraRun
+Exec=/opt/apps/$UNZIPPED_DIR/ghidraRun
 GenericName=Ghidra Software Reverse Engineering Suite
-Icon=/opt/apps/$UNZIPPED_DIR_/docs/images/GHIDRA_1.png
+Icon=/opt/apps/$UNZIPPED_DIR/docs/images/GHIDRA_1.png
 MimeType=
 Name=Ghidra
-Path=/opt/apps/$UNZIPPED_DIR_
+Path=/opt/apps/$UNZIPPED_DIR
 StartupNotify=false
 Terminal=false
 TerminalOptions=
 Type=Application
 Version=1.0' > /usr/share/applications/ghidra.desktop"
 else
-    echo "Error ghidra file not found."
+    echo "Error $URL not found."
 fi
 EOF
 	chmod +x /usr/bin/installer-ghidra
 	bash /usr/bin/installer-ghidra
 
 	### YOUTUBE DOWNLOADER
-    cat << 'EOF' | tee /usr/bin/installer-yt-dlp > /dev/null
+    cat <<"EOF" >/usr/bin/installer-yt-dlp
 #!/bin/bash
 URL="https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp"
-if wget --quiet --spider "$URL"; then
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
     apt purge -y yt-dlp
 	rm -rf /opt/apps/yt-*
 	rm -rf /usr/bin/yt-*
@@ -423,47 +597,49 @@ if wget --quiet --spider "$URL"; then
 	chmod 755 /opt/apps/yt-dlp
 	ln -sf /opt/apps/yt-dlp /usr/bin/yt-dlp
 else
-    echo "yt-dlp file not found."
+    echo "Error $URL not found."
 fi
 EOF
 	chmod +x /usr/bin/installer-yt-dlp
 	bash /usr/bin/installer-yt-dlp
 
 	### NMAP
-	cat << 'EOF' | tee /usr/bin/installer-nmap > /dev/null
+	cat <<"EOF" > /usr/bin/installer-nmap-suite
 #!/bin/bash
 CURRENT_DIR=$(pwd)
 SOURCE_CODE_FILE=$(curl -s https://nmap.org/download | grep tar.bz2 | head -n 1 | cut -d " " -f 3)
 URL="https://nmap.org/dist/$SOURCE_CODE_FILE"
 INSTALL_DIR="/opt/apps/nmap-suite"
-DEPS=(python3-pip gcc g++ make liblua5.4-dev libssl-dev libssh2-1-dev libtool-bin)
-CLEANUP_DEPS=(python3-pip libssl-dev libssh2-1-dev libtool-bin)
-if wget --quiet --spider "$URL"; then
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
 	apt purge -y nmap*
 	rm -rf "$INSTALL_DIR"
 	rm -rf /usr/bin/nmap /usr/bin/ncat /usr/bin/nping /usr/bin/zenmap /usr/bin/ndiff
-	apt update
-	apt install -y "${DEPS[@]}"
+	apt update && apt build-dep -y nmap
 	mkdir -p -v /opt/apps/nmap-suite
 	wget --inet4-only --https-only --show-progress -q "$URL" -O "$SOURCE_CODE_FILE"
 	tar xjf "$SOURCE_CODE_FILE"
 	rm -rf "$SOURCE_CODE_FILE"
 	EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name "nmap-*" -print -quit)
 	cd "$EXTRACTED_DIR"
-	./configure --quiet --prefix="$INSTALL_DIR" --without-zenmap --without-ndiff
-	make -j 2
+	./configure --quiet --prefix="$INSTALL_DIR"
+	make -j 1
 	make install
-	ln -sf "$INSTALL_DIR"/bin/nmap /usr/bin/nmap
-    ln -sf "$INSTALL_DIR"/bin/ncat /usr/bin/ncat
-    ln -sf "$INSTALL_DIR"/bin/nping /usr/bin/nping
+	if ! grep -q "export PATH=\"\$PATH:/opt/apps/nmap-suite/bin\"" /etc/profile; then
+		export PATH="$PATH:$INSTALL_DIR/bin"
+		echo "export PATH=\$PATH:$INSTALL_DIR/bin" | tee /etc/profile.d/nmap-path.sh > /dev/null
+		echo "Nmap PATH added for all users."
+	else
+		echo "La ruta de Nmap ya está configurada en /etc/profile."
+	fi
+	echo "$SOURCE_CODE_FILE installed successfully!"
 else
-	echo "Nmap source code 404."
+	echo "Error $URL not found."
 fi
-rm -rf "$CURRENT_DIR"/nmap-* "$SOURCE_CODE_FILE"
 cd "$CURRENT_DIR"
+rm -rf "$CURRENT_DIR"/nmap-* "$SOURCE_CODE_FILE"
 EOF
-	chmod +x /usr/bin/installer-nmap
-	bash /usr/bin/installer-nmap
+	chmod +x /usr/bin/installer-nmap-suite
+	bash /usr/bin/installer-nmap-suite
 	
 	### SQLMAP
 	apt purge -y sqlmap*
@@ -474,33 +650,32 @@ EOF
 	ln -sf /opt/apps/sqlmap-dev/sqlmap.py /usr/bin/sqlmap
 	
 	### FFMPEG
-    cat << 'EOF' | tee /usr/bin/installer-ffmpeg-master > /dev/null
+    cat <<"EOF" > /usr/bin/installer-ffmpeg-master
 #!/bin/bash
 URL="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz"
-if wget --quiet --spider "$URL"; then
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
     rm -rf /opt/apps/ffmpeg*
     rm -rf /usr/bin/master-ff*
-    mkdir -v -p /opt/apps/
     wget --inet4-only --https-only --show-progress -q "$URL"
     tar xf ffmpeg-master-latest-linux64-gpl.tar.xz
     rm -rf ffmpeg-master-latest-linux64-gpl.tar.xz
-    mv ffmpeg-master-latest-linux64-gpl /opt/apps
+    mv -v ffmpeg-master-latest-linux64-gpl /opt/apps
     ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffmpeg /usr/bin/master-ffmpeg
     ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffplay /usr/bin/master-ffplay
     ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffprobe /usr/bin/master-ffprobe
 else
-    echo "Error ffmpeg-master-latest-linux64-gpl.tar.xz file not found."
+    echo "Error: The URL '$URL' is not available."
 fi
 EOF
 	chmod +x /usr/bin/installer-ffmpeg-master
 	bash /usr/bin/installer-ffmpeg-master
 
 	### Android SDK Platform-Tools - adb and fastboot
-	cat << 'EOF' | tee /usr/bin/installer-android-tools > /dev/null
+	cat <<"EOF" >/usr/bin/installer-android-tools
 #!/bin/bash
 URL="https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
 FILE=$(basename "$URL")
-if wget --quiet --spider "$URL"; then
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
 	rm -rf /opt/apps/platform-tools*
 	rm -rf /usr/bin/adb /usr/bin/fastboot
 	wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
@@ -510,14 +685,14 @@ if wget --quiet --spider "$URL"; then
 	ln -sf /opt/apps/platform-tools/adb /usr/bin/adb
 	ln -sf /opt/apps/platform-tools/fastboot /usr/bin/fastboot
 else
-	echo "Error $URL not found"
+	echo "Error $URL not found."
 fi
 EOF
 	chmod +x /usr/bin/installer-android-tools
 	bash /usr/bin/installer-android-tools
 
 	### GO LANGUAGE
-	cat << 'EOF' | tee /usr/bin/installer-go > /dev/null
+	cat <<"EOF" > /usr/bin/installer-go
 #!/bin/bash
 ARCH="amd64"
 OS="linux"
@@ -525,7 +700,7 @@ GO_URL_BASE="https://go.dev/dl"
 LATEST_VERSION=$(curl -s 'https://go.dev/VERSION?m=text' | head -n 1)
 FILE="$LATEST_VERSION.$OS-$ARCH.tar.gz"
 URL="$GO_URL_BASE/$FILE"
-if wget --quiet --spider "$URL"; then
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
 	wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
 	rm -rf /usr/local/go
 	rm -rf /opt/apps/go
@@ -535,51 +710,73 @@ if wget --quiet --spider "$URL"; then
 		echo "export PATH=\$PATH:/opt/apps/go/bin" | tee /etc/profile.d/go-path.sh > /dev/null
 		echo "Ruta de Go agregada a /etc/profile.d/go-path.sh para todos los usuarios."
 	else
-		echo "La ruta de Go ya está configurada en /etc/profile.d/go-path.sh."
+		echo "La ruta de Go ya está configurada en /etc/profile."
 	fi
 	echo "Go $VERSION installed successfully!"
 else
-	echo "Error: Could not retrieve the latest Go version."
+	echo "Error $URL not found."
 fi
 EOF
 	chmod +x /usr/bin/installer-go
 	bash /usr/bin/installer-go
 
+	### LATEST PYTHON
+	cat << 'EOF' | tee /usr/bin/installer-python > /dev/null
+#!/bin/bash
+CURRENT_DIR=$(pwd)
+INSTALL_DIR="/opt/apps"
+VERSION=$(curl -s https://www.python.org/ | grep Latest | head -n 1 | sed -E 's/.*Python\s([0-9.]*).*/\1/')
+#VERSION=$(curl -s https://www.python.org/ | grep -oP 'Latest: <a href="/downloads/release/python-\K[0-9.]+' | head -n 1)
+URL="https://www.python.org/ftp/python/${VERSION}/Python-${VERSION}.tar.xz"
+FILE=$(basename "$URL")
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
+	wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
+	apt update && apt build-dep -y python3
+	tar xf "$FILE"
+	mv Python-"$VERSION"
+	./configure --prefix="$INSTALL_DIR"/python --enable-optimizations --enable-ipv6
+	make
+	make test
+	make install
+else
+	echo "Error $URL not found."
+fi
+cd "$CURRENT_DIR"
+rm -rf "$FILE"
+rm -rf Python-"$VERSION"
+EOF
+	chmod +x /usr/bin/installer-python
+	#bash /usr/bin/installer-python
+
+	### OLLAMA
+	curl -fsSL https://ollama.com/install.sh | sh
+	systemctl disable ollama
+	systemctl stop ollama
+
 	###
-	chown -R some:some /opt/apps/*
+	chown -R tomas:tomas /opt/apps/*
 
 	mkdir -v -p /opt/songs
 	touch /opt/songs/SONG{001..102}.flac
-
-	### OFFICIAL DEBIAN PACKAGES
-	apt update
-	apt install -y $_PACKAGES
 }
 
 _cookie_fortune()
 {
 	## https://stackoverflow.com/questions/414164/how-can-i-select-random-files-from-a-directory-in-bash
-	apt update
-	apt install -y cowsay fortunes
-	cat << 'EOF' | tee /usr/bin/cookie-fortune > /dev/null
+	apt update && apt install -y cowsay fortunes
+	cat <<"EOF" > /usr/bin/cookie-fortune
 #!/bin/bash
-main_()
-{
-	CHARACTER_=$(ls /usr/share/cowsay/cows/ | shuf -n 1)
-	fortune -s | cowsay -f $CHARACTER_
-}
-main_
+CHARACTER=$(ls /usr/share/cowsay/cows/ | shuf -n 1)
+fortune -s | cowsay -f $CHARACTER
 EOF
     rm -rf /usr/share/applications/fortune.desktop
 	chmod 755 /usr/bin/cookie-fortune
     bash /usr/bin/cookie-fortune
 }
 
-_main
-_flatpak
+_basic_setup
+_networking
+_debian_desktop
+#_daily_desktop
+#_flatpak
 _cookie_fortune
-
-/usr/bin/cookie-fortune
-
-
-
