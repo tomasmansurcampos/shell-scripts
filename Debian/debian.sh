@@ -111,13 +111,13 @@ EOF
 	rm -f /etc/apt/sources.list~
 	apt autoclean && apt clean && rm -rf /var/lib/apt/lists/* && apt clean
 
-	### EMACS NOX NO EXIM4 SERVER
-	apt update
-	apt install --no-install-recommends -y emacs-nox
-
 	### BASIC PACKAGES TO GET LETS START.
 	apt update
 	apt install -y $ESSENTIAL_PACKAGES
+
+	### EMACS NOX NO EXIM4 SERVER
+	apt update
+	apt install --no-install-recommends -y emacs-nox
 	
 	### CPU
 	wget --inet4-only --https-only https://dl.xanmod.org/check_x86-64_psabi.sh -O /usr/bin/check_x86-64_psabi
