@@ -273,6 +273,7 @@ _debian_desktop()
 	apt install -y $PACKAGES
 	
 	### LIQUORIX KERNEL
+ 	### curl -s 'https://liquorix.net/install-liquorix.sh' | sudo bash
 	curl -s "https://liquorix.net/liquorix-keyring.gpg" | gpg --batch --yes --output /etc/apt/keyrings/liquorix-keyring.gpg --dearmor
 	chmod 0644 /etc/apt/keyrings/liquorix-keyring.gpg
 	cat <<EOF > /etc/apt/sources.list.d/liquorix.sources
