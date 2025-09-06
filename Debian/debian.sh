@@ -118,6 +118,11 @@ EOF
 	### BASIC PACKAGES TO GET LETS START.
 	apt update
 	apt install -y $ESSENTIAL_PACKAGES
+	
+	### CPU
+	wget --inet4-only --https-only https://dl.xanmod.org/check_x86-64_psabi.sh -O /usr/bin/check_x86-64_psabi
+	chmod 755 /usr/bin/check_x86-64_psabi
+	/usr/bin/awk -f /usr/bin/check_x86-64_psabi
 }
 
 _networking()
