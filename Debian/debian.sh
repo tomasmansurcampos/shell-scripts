@@ -129,14 +129,19 @@ _networking()
 {
 
 	### DISABLING IPV6
-	cp -v /etc/sysctl.conf /root/.sysctl.conf.original
-	cat >> /etc/sysctl.conf << "EOF"
+ 	### SYSCTL.CONF FILE
+	cp -v /etc/sysctl.conf /root/sysctl.conf.bak
+	cat << "EOF" > /etc/sysctl.d/101-sysctl.conf
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
 net.ipv6.conf.lo.disable_ipv6 = 1
 EOF
 	sysctl -p
 	systemctl restart procps.service
+	### GRUB
+ 	cp -v /etc/default/grub /etc/default/grub.bak
+ 	sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="ipv6.disable=1"/' /etc/default/grub
+  	/usr/sbin/update-grub
 
 	### STUBBY DOT SERVERS CONFIGURATION
 	systemctl stop stubby.service
