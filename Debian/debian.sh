@@ -106,7 +106,7 @@ Components: main contrib non-free non-free-firmware
 Enabled: yes
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 EOF
-	mv -v /etc/apt/sources.list /etc/apt/.sources.list.original
+	mv -v /etc/apt/sources.list /etc/apt/.sources.list.bak
 	rm -f /etc/apt/sources.list
 	rm -f /etc/apt/sources.list~
 	apt autoclean && apt clean && rm -rf /var/lib/apt/lists/* && apt clean
@@ -229,7 +229,7 @@ EOF
 	cp -v /etc/resolv.conf.stubby /etc/resolv.conf
 	chattr +i /etc/resolv.conf
 
-	cp -v /etc/hosts /etc/hosts.original
+	cp -v /etc/hosts /etc/hosts.bak
 
 	### GOOGLE
 	cat <<"EOF" > /usr/bin/dnsgoogle
@@ -237,7 +237,7 @@ EOF
 chattr -i /etc/resolv.conf
 cp -v /etc/resolv.conf.stubby /etc/resolv.conf
 chattr +i /etc/resolv.conf
-cp -v /etc/hosts.original /etc/hosts
+cp -v /etc/hosts.bak /etc/hosts
 cp -v /etc/stubby/stubby.yml.google /etc/stubby/stubby.yml
 systemctl restart stubby.service
 EOF
@@ -249,7 +249,7 @@ EOF
 chattr -i /etc/resolv.conf
 cp -v /etc/resolv.conf.stubby /etc/resolv.conf
 chattr +i /etc/resolv.conf
-cp -v /etc/hosts.original /etc/hosts
+cp -v /etc/hosts.bak /etc/hosts
 cp -v /etc/stubby/stubby.yml.dns.sb /etc/stubby/stubby.yml
 systemctl restart stubby.service
 EOF
