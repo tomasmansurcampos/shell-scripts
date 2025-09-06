@@ -129,8 +129,8 @@ _networking()
 {
 
 	### DISABLING IPV6
-	cp -v /etc/sysctl.conf /etc/.sysctl.conf.original
-	cat <<"EOF" >> /etc/sysctl.conf
+	cp -v /etc/sysctl.conf /root/.sysctl.conf.original
+	cat >> /etc/sysctl.conf << "EOF"
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
 net.ipv6.conf.lo.disable_ipv6 = 1
