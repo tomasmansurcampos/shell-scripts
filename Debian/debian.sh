@@ -70,7 +70,7 @@ _basic_setup()
 	  exit
 	fi
 
-	cp -v /root/.bashrc /root/.bashrc.original
+	cp -v /root/.bashrc /root/.bashrc.bak
 	cat <<"EOF" >> /root/.bashrc # this is IMPORTANT.
 export PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin
 EOF
@@ -146,7 +146,7 @@ EOF
 
 	### STUBBY DOT SERVERS CONFIGURATION
 	systemctl stop stubby.service
-	cp -v /etc/stubby/stubby.yml /etc/stubby/stubby.yml.original
+	cp -v /etc/stubby/stubby.yml /etc/stubby/stubby.yml.bak
 
 	### GOOGLE PUBLIC DNS
 	cat <<"EOF" > /etc/stubby/stubby.yml.google
@@ -221,7 +221,7 @@ EOF
 	systemctl restart stubby.service
 
 	### STATIC RESOLV CONF FILE
-	cp -v /etc/resolv.conf /etc/resolv.conf.original
+	cp -v /etc/resolv.conf /etc/resolv.conf.bak
 	cat <<"EOF" > /etc/resolv.conf.stubby
 nameserver 127.0.0.3
 options trust-ad
@@ -258,7 +258,7 @@ EOF
 	### NTP ENCRYPTED
 	apt update && apt install -y ntpsec
 	systemctl stop ntpsec.service
-	cp -v /etc/ntpsec/ntp.conf /etc/ntpsec/.ntp.conf.original
+	cp -v /etc/ntpsec/ntp.conf /etc/ntpsec/ntp.conf.bak
 	cat <<"EOF" > /etc/ntpsec/ntp.conf
 driftfile /var/lib/ntpsec/ntp.drift
 leapfile /usr/share/zoneinfo/leap-seconds.list
