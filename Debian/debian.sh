@@ -215,7 +215,7 @@ upstream_recursive_servers:
 #        value: amEjS6OJ74LvhMNJBxN3HXxOMSWAriaFoyMQn/Nb5FU=
 EOF
 
-	cp -v /etc/stubby/stubby.yml.google /etc/stubby/stubby.yml
+	cp -v /etc/stubby/stubby.yml.dns.sb /etc/stubby/stubby.yml
 	systemctl enable --now stubby.service
 	systemctl restart stubby.service
 
