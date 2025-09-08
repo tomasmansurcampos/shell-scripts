@@ -24,6 +24,7 @@ _flatpak()
 	flatpak update -y
 
 	flatpak install -y flathub com.github.tchx84.Flatseal
+	flatpak install -y flathub io.github.dosbox-staging
 	#flatpak install -y flathub org.keepassxc.KeePassXC
 	#flatpak install -y flathub org.mozilla.firefox
 	#rm -rf /usr/bin/firefox
