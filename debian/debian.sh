@@ -351,7 +351,7 @@ EOF
 	#apt update && apt install --install-recommends -y firefox-esr
 	apt purge -y firefox* && rm -rf /home/*/.mozilla && rm -rf /home/*/.cache/mozilla
 	install -d -m 0755 /etc/apt/keyrings
-	wget --inet4-only --https-only -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
+	wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
 	gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc | awk '/pub/{getline; gsub(/^ +| +$/,""); if($0 == "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3") print "\nThe key fingerprint matches ("$0").\n"; else print "\nVerification failed: the fingerprint ("$0") does not match the expected one.\n"}'
 	cat <<EOF > /etc/apt/sources.list.d/mozilla.sources
 Types: deb
@@ -369,7 +369,7 @@ EOF
 	apt update && apt install -y firefox
 
 	### VIRTUAL BOX
-	wget --inet4-only --https-only -qO- https://www.virtualbox.org/download/oracle_vbox_2016.asc | gpg --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg --dearmor
+	wget --inet4-only -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | gpg --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg --dearmor
 	cat <<EOF > /etc/apt/sources.list.d/vbox.sources
 Types: deb
 URIs: https://download.virtualbox.org/virtualbox/debian
@@ -381,7 +381,7 @@ EOF
 	apt update && apt install --install-recomends -y virtualbox-7.2 linux-headers-amd64 linux-headers-$(uname -r)
 
 	### VSCODE
-	wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+	wget --inet4-only -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
 	install -D -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/microsoft.gpg
 	rm -f microsoft.gpg
 	cat <<EOF > /etc/apt/sources.list.d/vscode.sources
