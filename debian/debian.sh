@@ -378,7 +378,7 @@ Components: contrib
 Architectures: amd64
 Signed-By: /usr/share/keyrings/oracle-virtualbox-2016.gpg
 EOF
-	apt update && apt install --install-recomends -y virtualbox-7.2 linux-headers-amd64 linux-headers-$(uname -r)
+	apt update && apt install --install-recommends -y virtualbox-7.2 linux-headers-amd64 linux-headers-$(uname -r)
 
 	### VSCODE
 	wget --inet4-only -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
