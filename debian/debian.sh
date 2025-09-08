@@ -128,6 +128,22 @@ EOF
 	else
 		echo "Error https://dl.xanmod.org/check_x86-64_psabi.sh not found." 
 	fi
+
+ 	### FASTFETCH
+    cat <<"EOF" > /usr/bin/installer-fastfetch-cli
+#!/bin/bash
+URL="https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.deb"
+FILE=$(basename "$URL")
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
+    wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
+    apt install -y "./$FILE"
+	rm -f "$FILE"
+else
+    echo "Error $URL not found."
+fi
+EOF
+	chmod +x /usr/bin/installer-fastfetch-cli
+	bash /usr/bin/installer-fastfetch-cli
 }
 
 _networking()
@@ -377,22 +393,6 @@ Architectures: $(dpkg --print-architecture)
 Signed-By: /usr/share/keyrings/microsoft.gpg
 EOF
 	apt update && apt install -y code
-
-	### FASTFETCH
-    cat <<"EOF" > /usr/bin/installer-fastfetch-cli
-#!/bin/bash
-URL="https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.deb"
-FILE=$(basename "$URL")
-if wget --inet4-only --https-only --quiet --spider "$URL"; then
-    wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
-    apt install -y "./$FILE"
-	rm -f "$FILE"
-else
-    echo "Error $URL not found."
-fi
-EOF
-	chmod +x /usr/bin/installer-fastfetch-cli
-	bash /usr/bin/installer-fastfetch-cli
 }
 
 _cookie_fortune()
