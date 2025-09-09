@@ -162,6 +162,7 @@ EOF
 	### GRUB
  	cp -v /etc/default/grub /etc/default/grub.bak
  	sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="ipv6.disable=1"/' /etc/default/grub
+  	sed -i 's/^GRUB_CMDLINE_LINUX=".*"/GRUB_CMDLINE_LINUX="ipv6.disable=1"/' /etc/default/grub
   	/usr/sbin/update-grub
    	### MODULE ANTI IPV6
 	echo <<"EOF" > /etc/modprobe.d/disable-ipv6.conf
