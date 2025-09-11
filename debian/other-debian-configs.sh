@@ -47,6 +47,8 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOF
 	mkdir -v -p /opt/qbittorrent-nox-downloads
+ 	mkdir -v -p /opt/qbittorrent-nox-downloads/Downloads
+  	mkdir -v -p /opt/qbittorrent-nox-downloads/Descargas
 	chown qbittorrent-nox:qbittorrent-nox /opt/qbittorrent-nox-downloads
 	usermod -d /opt/qbittorrent-nox-downloads qbittorrent-nox
 	systemctl daemon-reload
