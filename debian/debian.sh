@@ -14,7 +14,7 @@ OPENBOX="openbox menu obconf lightdm xfce4-terminal network-manager git kpcli nn
 
 _flatpak()
 {
-	#apt purge flatpak -y && rm -rf /var/lib/flatpak/ && rm -rf /home/*/.cache/flatpak/ && rm -rf /home/*/.local/share/flatpak/ && rm -rf /home/*/.var/app/* && rm -rf /root/.local/share/flatpak/
+	#apt purge flatpak -y && rm -vrf /var/lib/flatpak/ && rm -vrf /home/*/.cache/flatpak/ && rm -vrf /home/*/.local/share/flatpak/ && rm -vrf /home/*/.var/app/* && rm -vrf /root/.local/share/flatpak/
 
 	apt update && apt install --reinstall -y flatpak
 
@@ -27,7 +27,7 @@ _flatpak()
 	flatpak install -y flathub io.github.dosbox-staging
 	#flatpak install -y flathub org.keepassxc.KeePassXC
 	#flatpak install -y flathub org.mozilla.firefox
-	#rm -rf /usr/bin/firefox
+	#rm -vrf /usr/bin/firefox
 	#ln -sf /var/lib/flatpak/exports/bin/org.mozilla.firefox /usr/bin/firefox
 	#update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/bin/firefox 200 && update-alternatives --set x-www-browser /usr/bin/firefox
 	flatpak install -y flathub io.github.thetumultuousunicornofdarkness.cpu-x
@@ -76,7 +76,7 @@ _basic_setup()
 export PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin
 EOF
 	cat <<"EOF" >> /root/.bashrc
-alias apt-clean='apt autoclean && apt clean && rm -rf /var/lib/apt/lists/* && apt clean'
+alias apt-clean='apt autoclean && apt clean && rm -vrf /var/lib/apt/lists/* && apt clean'
 EOF
 	source /root/.bashrc
 
@@ -108,9 +108,9 @@ Enabled: yes
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 EOF
 	mv -v /etc/apt/sources.list /etc/apt/.sources.list.bak
-	rm -f /etc/apt/sources.list
-	rm -f /etc/apt/sources.list~
-	apt autoclean && apt clean && rm -rf /var/lib/apt/lists/* && apt clean
+	rm -vf /etc/apt/sources.list
+	rm -vf /etc/apt/sources.list~
+	apt autoclean && apt clean && rm -vrf /var/lib/apt/lists/* && apt clean
 
 	### BASIC PACKAGES TO GET LETS START.
 	apt update
@@ -137,7 +137,7 @@ FILE=$(basename "$URL")
 if wget --inet4-only --https-only --quiet --spider "$URL"; then
     wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
     apt install -y "./$FILE"
-	rm -f "$FILE"
+	rm -vf "$FILE"
 else
     echo "Error $URL not found."
 fi
@@ -328,7 +328,7 @@ if wget --inet4-only --https-only --quiet --spider "$URL"; then
     wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
     tar xf "$FILE"
     mv -v tor-browser/ /opt/apps
-    rm -rf "$FILE"
+    rm -vf "$FILE"
 else
     echo "Error $URL not found."
 fi
@@ -344,7 +344,7 @@ FILE=$(basename "$URL")
 if wget --inet4-only --https-only --quiet --spider "$URL"; then
     wget --inet4-only --https-only --show-progress -q "$URL" -O "$FILE"
     apt install -y "./$FILE"
-	rm -f "$FILE"
+	rm -vf "$FILE"
 else
     echo "Error $URL not found."
 fi
@@ -354,7 +354,7 @@ EOF
 
 	### FIREFOX
 	#apt update && apt install --install-recommends -y firefox-esr
-	apt purge -y firefox* && rm -rf /home/*/.mozilla && rm -rf /home/*/.cache/mozilla
+	apt purge -y firefox* && rm -vrf /home/*/.mozilla && rm -vrf /home/*/.cache/mozilla
 	install -d -m 0755 /etc/apt/keyrings
 	wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
 	gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc | awk '/pub/{getline; gsub(/^ +| +$/,""); if($0 == "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3") print "\nThe key fingerprint matches ("$0").\n"; else print "\nVerification failed: the fingerprint ("$0") does not match the expected one.\n"}'
@@ -388,7 +388,7 @@ EOF
 	### VSCODE
 	wget --inet4-only -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
 	install -D -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/microsoft.gpg
-	rm -f microsoft.gpg
+	rm -vf microsoft.gpg
 	cat <<EOF > /etc/apt/sources.list.d/vscode.sources
 Types: deb
 URIs: https://packages.microsoft.com/repos/code
@@ -409,7 +409,7 @@ _cookie_fortune()
 CHARACTER=$(ls /usr/share/cowsay/cows/ | shuf -n 1)
 fortune -s | cowsay -f $CHARACTER
 EOF
-	rm -rf /usr/share/applications/fortune.desktop
+	rm -vf /usr/share/applications/fortune.desktop
 	chmod 755 /usr/bin/cookie-fortune
 	bash /usr/bin/cookie-fortune
 }
