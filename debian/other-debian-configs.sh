@@ -28,8 +28,6 @@ _daily_desktop()
 {
 	### QBITTORRENT-NOX
 	apt install -y qbittorrent-nox
-	adduser --system --group qbittorrent-nox
-	adduser someone qbittorrent-nox
 	cat <<"EOF" > /etc/systemd/system/qbittorrent-nox.service
 [Unit]
 Description=qBittorrent Command Line Client
@@ -37,20 +35,15 @@ After=network.target
 
 [Service]
 Type=forking
-User=qbittorrent-nox
-Group=qbittorrent-nox
+User=someone
+Group=someone
 UMask=007
-ExecStart=/usr/bin/qbittorrent-nox -d --webui-port=8080 --save-path=/opt/qbittorrent-nox-downloads
+ExecStart=/usr/bin/qbittorrent-nox -d --webui-port=8080 --save-path=/home/someone
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 EOF
-	mkdir -v -p /opt/qbittorrent-nox-downloads
- 	mkdir -v -p /opt/qbittorrent-nox-downloads/Downloads
-  	mkdir -v -p /opt/qbittorrent-nox-downloads/Descargas
-	chown qbittorrent-nox:qbittorrent-nox /opt/qbittorrent-nox-downloads
-	usermod -d /opt/qbittorrent-nox-downloads qbittorrent-nox
 	systemctl daemon-reload
 	systemctl start qbittorrent-nox.service
 	systemctl enable qbittorrent-nox.service
