@@ -50,8 +50,8 @@ EOF
 	chown qbittorrent-nox:qbittorrent-nox /opt/qbittorrent-nox-downloads
 	usermod -d /opt/qbittorrent-nox-downloads qbittorrent-nox
 	systemctl daemon-reload
-	systemctl start qbittorrent-nox
-	systemctl enable qbittorrent-nox
+	systemctl start qbittorrent-nox.service
+	systemctl enable qbittorrent-nox.service
 	
 	### PACKET TRACER NO-NETWORK
 	cat <<EOF > /usr/share/applications/packet-tracer-no-network.desktop
