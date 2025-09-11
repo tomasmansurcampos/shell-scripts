@@ -40,15 +40,15 @@ Type=forking
 User=qbittorrent-nox
 Group=qbittorrent-nox
 UMask=007
-ExecStart=/usr/bin/qbittorrent-nox -d --webui-port=8080
+ExecStart=/usr/bin/qbittorrent-nox -d --webui-port=8080 --save-path=/opt/qbittorrent-nox-downloads
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 EOF
-	mkdir /opt/qbittorrent-nox
-	chown qbittorrent-nox:qbittorrent-nox /opt/qbittorrent-nox
-	usermod -d /opt/qbittorrent-nox qbittorrent-nox
+	mkdir -v -p /opt/qbittorrent-nox-downloads
+	chown qbittorrent-nox:qbittorrent-nox /opt/qbittorrent-nox-downloads
+	usermod -d /opt/qbittorrent-nox-downloads qbittorrent-nox
 	systemctl daemon-reload
 	systemctl start qbittorrent-nox
 	systemctl enable qbittorrent-nox
