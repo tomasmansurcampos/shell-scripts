@@ -406,6 +406,27 @@ Architectures: $(dpkg --print-architecture)
 Signed-By: /usr/share/keyrings/microsoft.gpg
 EOF
 	apt update && apt install -y code
+
+ 	### FFMPEG
+    cat <<"EOF" > /usr/bin/installer-ffmpeg-master
+#!/bin/bash
+URL="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz"
+if wget --inet4-only --https-only --quiet --spider "$URL"; then
+    rm -rf /opt/apps/ffmpeg*
+    rm -rf /usr/bin/master-ff*
+    wget --inet4-only --https-only --show-progress -q "$URL"
+    tar xf ffmpeg-master-latest-linux64-gpl.tar.xz
+    rm -rf ffmpeg-master-latest-linux64-gpl.tar.xz
+    mv -v ffmpeg-master-latest-linux64-gpl /opt/apps
+    ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffmpeg /usr/bin/master-ffmpeg
+    ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffplay /usr/bin/master-ffplay
+    ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffprobe /usr/bin/master-ffprobe
+else
+    echo "Error: The URL '$URL' is not available."
+fi
+EOF
+	chmod +x /usr/bin/installer-ffmpeg-master
+	bash /usr/bin/installer-ffmpeg-master
 }
 
 _cookie_fortune()
