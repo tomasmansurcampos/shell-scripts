@@ -352,6 +352,18 @@ EOF
 	chmod +x /usr/bin/installer-google-chrome
 	bash /usr/bin/installer-google-chrome
 
+ 	### PACKET TRACER NO-NETWORK
+	cat <<"EOF" > /usr/share/applications/packet-tracer-no-network.desktop
+[Desktop Entry]
+Type=Application
+Exec=unshare -rn /opt/pt/packettracer
+Name=PacTreiser NO-NETWORK
+Icon=/opt/pt/art/app.png
+Terminal=false
+StartupNotify=true
+MimeType=application/x-pkt;application/x-pka;application/x-pkz;application/x-pks;application/x-pksz;
+EOF
+
 	### VIRTUAL BOX
 	wget --inet4-only -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | gpg --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg --dearmor
 	cat <<EOF > /etc/apt/sources.list.d/vbox.sources
