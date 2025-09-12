@@ -70,11 +70,11 @@ EOF
 	systemctl enable qbittorrent-nox.service
 	
 	### PACKET TRACER NO-NETWORK
-	cat <<EOF > /usr/share/applications/packet-tracer-no-network.desktop
+	cat <<"EOF" > /usr/share/applications/packet-tracer-no-network.desktop
 [Desktop Entry]
 Type=Application
 Exec=unshare -rn /opt/pt/packettracer
-Name=PacsitoTreiser NO-NETWORK
+Name=PacTreiser NO-NETWORK
 Icon=/opt/pt/art/app.png
 Terminal=false
 StartupNotify=true
