@@ -295,6 +295,23 @@ restrict 127.0.0.1
 #restrict ::1
 EOF
 	systemctl restart ntpsec.service
+
+ 	### LOCAL DNS SERVER
+	apt install -y dnsmasq
+	systemctl stop dnsmasq.service
+	cp -v /etc/dnsmasq.conf /etc/dnsmasq.conf.bak
+	cat <<"EOF" > /etc/dnsmasq.conf
+port=53
+#domain-needed
+bogus-priv
+resolv-file=/etc/resolv.conf
+strict-order
+interface=enp3s0
+no-dhcp-interface=enp3s0
+bind-interfaces
+cache-size=0
+EOF
+	systemctl restart dnsmasq.service
 }
 
 _debian_desktop()
