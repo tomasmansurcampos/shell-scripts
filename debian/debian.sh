@@ -28,18 +28,18 @@ _flatpak()
 	#flatpak install -y flathub org.keepassxc.KeePassXC
 	#flatpak install -y flathub org.mozilla.firefox
 	#rm -vrf /usr/bin/firefox
-	#ln -sf /var/lib/flatpak/exports/bin/org.mozilla.firefox /usr/bin/firefox
+	#ln -vsf /var/lib/flatpak/exports/bin/org.mozilla.firefox /usr/bin/firefox
 	#update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/bin/firefox 200 && update-alternatives --set x-www-browser /usr/bin/firefox
 	flatpak install -y flathub io.github.thetumultuousunicornofdarkness.cpu-x
 	#flatpak install -y flathub io.missioncenter.MrissionCenter
 	#flatpak install -y flathub io.gitlab.librewolf-community
 	#flatpak install -y flathub io.github.ungoogled_software.ungoogled_chromium
 	#flatpak install -y flathub org.gnome.TextEditor
-	#ln -sf /var/lib/flatpak/app/org.gnome.TextEditor/current/active/export/bin/org.gnome.TextEditor /usr/bin/gedit
+	#ln -vsf /var/lib/flatpak/app/org.gnome.TextEditor/current/active/export/bin/org.gnome.TextEditor /usr/bin/gedit
 	#flatpak install -y flathub com.vscodium.codium
-	#ln -sf /var/lib/flatpak/app/com.vscodium.codium/current/active/export/bin/com.vscodium.codium /usr/bin/code
-	#ln -sf /var/lib/flatpak/app/com.vscodium.codium/current/active/export/bin/com.vscodium.codium /usr/bin/codium
-	#ln -sf /var/lib/flatpak/app/com.vscodium.codium/current/active/export/bin/com.vscodium.codium /usr/bin/vscodium
+	#ln -vsf /var/lib/flatpak/app/com.vscodium.codium/current/active/export/bin/com.vscodium.codium /usr/bin/code
+	#ln -vsf /var/lib/flatpak/app/com.vscodium.codium/current/active/export/bin/com.vscodium.codium /usr/bin/codium
+	#ln -vsf /var/lib/flatpak/app/com.vscodium.codium/current/active/export/bin/com.vscodium.codium /usr/bin/vscodium
 	#flatpak install -y flathub org.onlyoffice.desktopeditors
 	#flatpak install -y flathub org.libreoffice.LibreOffice
 	#flatpak install -y flathub org.gimp.GIMP
@@ -412,15 +412,15 @@ EOF
 #!/bin/bash
 URL="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz"
 if wget --inet4-only --https-only --quiet --spider "$URL"; then
-    rm -rf /opt/apps/ffmpeg*
-    rm -rf /usr/bin/master-ff*
+    rm -vrf /opt/apps/ffmpeg*
+    rm -vrf /usr/bin/master-ff*
     wget --inet4-only --https-only --show-progress -q "$URL"
     tar xf ffmpeg-master-latest-linux64-gpl.tar.xz
-    rm -rf ffmpeg-master-latest-linux64-gpl.tar.xz
+    rm -vrf ffmpeg-master-latest-linux64-gpl.tar.xz
     mv -v ffmpeg-master-latest-linux64-gpl /opt/apps
-    ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffmpeg /usr/bin/master-ffmpeg
-    ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffplay /usr/bin/master-ffplay
-    ln -sf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffprobe /usr/bin/master-ffprobe
+    ln -vsf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffmpeg /usr/bin/master-ffmpeg
+    ln -vsf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffplay /usr/bin/master-ffplay
+    ln -vsf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffprobe /usr/bin/master-ffprobe
 else
     echo "Error: The URL '$URL' is not available."
 fi
