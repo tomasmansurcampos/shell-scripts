@@ -318,7 +318,7 @@ _debian_desktop()
 {
 	### OFFICIAL DEBIAN PACKAGES
 	apt update
-	apt install -y $PACKAGES
+	apt install --install-recommends -y $PACKAGES
 	
 	### LIQUORIX KERNEL
  	### curl -s 'https://liquorix.net/install-liquorix.sh' | sudo bash
