@@ -2,7 +2,7 @@
 
 ESSENTIAL_PACKAGES="build-essential dnsutils kpcli man fwupd gnupg gcc gcc-doc nasm gdb python-is-python3 stubby curl wget screen minicom jq git make binutils tcpdump lynx nala lm-sensors fancontrol lsb-release htop bmon locales-all ascii ipcalc sipcalc rar unrar zip unzip p7zip p7zip-full p7zip-rar ffmpeg flac sox libsox-fmt-all"
 
-PACKAGES="libreoffice keepassxc keepass2 putty bleachbit gnome-disk-utility vlc audacity spek geany"
+PACKAGES="libreoffice ttf-mscorefonts-installer keepassxc keepass2 putty bleachbit gnome-disk-utility vlc audacity spek geany"
 
 UNWANTED_PACKAGES="firefox-esr firefox* synaptic smtube qps quassel meteo-qt audacious popularity-contest evolution qbittorrent quodlibet parole exfalso yelp seahorse totem cheese" #malcontent
 
