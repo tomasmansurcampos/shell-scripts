@@ -318,22 +318,37 @@ EOF
 	cat <<"EOF" > /usr/bin/make-hosts-block-ads
 #!/bin/bash
 
+URL1="https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts"
+URL2="https://someonewhocares.org/hosts/zero/hosts"
+
+wget --inet4-only --https-only "$URL1" -O /etc/hosts-filter-steven-black
+if [ $? -eq 0 ]; then
+    echo -e "\e[32m ✅ Steven Black Unified hosts = (adware + malware) Plus "fakenews + gambling" downloaded! \e[0m"
+else
+    echo -e "\e[31m ❌ Error: Steven Black url hosts file not found. \e[0m"
+    exit 1
+fi
+wget --inet4-only --https-only "$URL2" -O /etc/hosts-filter-dan-pollock
+if [ $? -eq 0 ]; then
+    echo -e "\e[32m ✅ Dan Pollock hosts file downloaded! \e[0m"
+else
+    echo -e "\e[31m ❌ Error: Dan Pollock hosts file not found. \e[0m"
+    exit 1
+fi
+
+cat /etc/hosts > /etc/hosts-filter-adblocker
+cat /etc/hosts-filter-steven-black >> /etc/hosts-filter-adblocker
+cat /etc/hosts-filter-dan-pollock >> /etc/hosts-filter-adblocker
+
+sed -i -e 's/web.facebook.com/0.0.0.0/g' /etc/hosts-filter-adblocker
+sed -i -e 's/crash.steampowered.com/0.0.0.0/g' /etc/hosts-filter-adblocker
+sed -i -e 's/click.discord.com/0.0.0.0/g' /etc/hosts-filter-adblocker
+
 chattr -i /etc/hosts
-
-wget --inet4-only --https-only https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts -O /etc/hosts-steven-black
-wget --inet4-only --https-only https://someonewhocares.org/hosts/zero/hosts -O /etc/hosts-dan-pollock
-
-cat /etc/hosts > /etc/hosts-ad-blocker
-cat /etc/hosts-steven-black >> /etc/hosts-ad-blocker
-cat /etc/hosts-dan-pollock >> /etc/hosts-ad-blocker
-
-sed -i -e 's/web.facebook.com/0.0.0.0/g' /etc/hosts-ad-blocker
-sed -i -e 's/crash.steampowered.com/0.0.0.0/g' /etc/hosts-ad-blocker
-sed -i -e 's/click.discord.com/0.0.0.0/g' /etc/hosts-ad-blocker
-
-awk '!seen[$0]++' /etc/hosts-ad-blocker
-
+awk '!seen[$0]++' /etc/hosts-filter-adblocker > /etc/hosts
 chattr +i /etc/hosts
+
+rm -vrf /etc/hosts-filter*
 EOF
 
 	chmod +x /usr/bin/make-hosts-block-ads
