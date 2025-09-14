@@ -324,33 +324,35 @@ EOF
 URL1="https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts"
 URL2="https://someonewhocares.org/hosts/zero/hosts"
 
-touch /etc/hosts-filter-steven-black
-wget --inet4-only --https-only --show-progress --quiet "$URL1" -O /etc/hosts-filter-steven-black
+touch /etc/hosts-filter-steven-black-noipv6
+wget --inet4-only --https-only --show-progress --quiet "$URL1" -O /etc/hosts-filter-steven-black-noipv6
 if [ $? -eq 0 ]; then
     echo -e "\e[32m ✅ Steven Black Unified hosts = (adware + malware) Plus "fakenews + gambling" downloaded! \e[0m"
+    sed -i.bak '/::/d' /etc/hosts-filter-steven-black-noipv6
 else
     echo -e "\e[31m ❌ Error: Steven Black url hosts file not found. \e[0m"
     exit 1
 fi
-touch /etc/hosts-filter-dan-pollock
-wget --inet4-only --https-only --show-progress --quiet "$URL2" -O /etc/hosts-filter-dan-pollock
+touch /etc/hosts-filter-dan-pollock-noipv6
+wget --inet4-only --https-only --show-progress --quiet "$URL2" -O /etc/hosts-filter-dan-pollock-noipv6
 if [ $? -eq 0 ]; then
     echo -e "\e[32m ✅ Dan Pollock hosts file downloaded! \e[0m"
+    sed -i.bak '/::/d' /etc/hosts-filter-dan-pollock-noipv6
 else
     echo -e "\e[31m ❌ Error: Dan Pollock hosts file not found. \e[0m"
     exit 1
 fi
 
 cat /etc/hosts > /etc/hosts-filter-adblocker
-cat /etc/hosts-filter-steven-black >> /etc/hosts-filter-adblocker
-cat /etc/hosts-filter-dan-pollock >> /etc/hosts-filter-adblocker
+cat /etc/hosts-filter-steven-black-noipv6 >> /etc/hosts-filter-adblocker-noipv6
+cat /etc/hosts-filter-dan-pollock-noipv6 >> /etc/hosts-filter-adblocker-noipv6
 
-sed -i -e 's/web.facebook.com/0.0.0.0/g' /etc/hosts-filter-adblocker
-sed -i -e 's/crash.steampowered.com/0.0.0.0/g' /etc/hosts-filter-adblocker
-sed -i -e 's/click.discord.com/0.0.0.0/g' /etc/hosts-filter-adblocker
+sed -i -e 's/web.facebook.com/0.0.0.0/g' /etc/hosts-filter-adblocker-noipv6
+sed -i -e 's/crash.steampowered.com/0.0.0.0/g' /etc/hosts-filter-adblocker-noipv6
+sed -i -e 's/click.discord.com/0.0.0.0/g' /etc/hosts-filter-adblocker-noipv6
 
 chattr -i /etc/hosts
-awk '!seen[$0]++' /etc/hosts-filter-adblocker > /etc/hosts
+awk '!seen[$0]++' /etc/hosts-filter-adblocker-noipv6 > /etc/hosts
 
 rm -vrf /etc/hosts-filter*
 
