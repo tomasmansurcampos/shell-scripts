@@ -256,6 +256,9 @@ EOF
 	chattr +i /etc/resolv.conf
 
 	cp -v /etc/hosts /etc/hosts.bak
+ 	sed -i.bak '/::/d' /etc/hosts
+  	cp -v /etc/hosts /etc/hosts.noipv6
+  	cp -v /etc/hosts /etc/hosts.noipv6.bak
 
 	### GOOGLE
 	cat <<"EOF" > /usr/bin/dnsgoogle
@@ -321,14 +324,16 @@ EOF
 URL1="https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts"
 URL2="https://someonewhocares.org/hosts/zero/hosts"
 
-wget --inet4-only --https-only "$URL1" -O /etc/hosts-filter-steven-black
+touch /etc/hosts-filter-steven-black
+wget --inet4-only --https-only --show-progress --quiet "$URL1" -O /etc/hosts-filter-steven-black
 if [ $? -eq 0 ]; then
     echo -e "\e[32m ✅ Steven Black Unified hosts = (adware + malware) Plus "fakenews + gambling" downloaded! \e[0m"
 else
     echo -e "\e[31m ❌ Error: Steven Black url hosts file not found. \e[0m"
     exit 1
 fi
-wget --inet4-only --https-only "$URL2" -O /etc/hosts-filter-dan-pollock
+touch /etc/hosts-filter-dan-pollock
+wget --inet4-only --https-only --show-progress --quiet "$URL2" -O /etc/hosts-filter-dan-pollock
 if [ $? -eq 0 ]; then
     echo -e "\e[32m ✅ Dan Pollock hosts file downloaded! \e[0m"
 else
@@ -346,9 +351,10 @@ sed -i -e 's/click.discord.com/0.0.0.0/g' /etc/hosts-filter-adblocker
 
 chattr -i /etc/hosts
 awk '!seen[$0]++' /etc/hosts-filter-adblocker > /etc/hosts
-chattr +i /etc/hosts
 
 rm -vrf /etc/hosts-filter*
+
+echo -e "\e[32m ✅ Archivo /etc/hosts bloqueando ads malware y mas con éxito !!! \e[0m"
 EOF
 
 	chmod +x /usr/bin/make-hosts-block-ads
