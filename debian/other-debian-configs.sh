@@ -4,25 +4,27 @@ _others()
 {
 	### FIREFOX
 	#apt update && apt install --install-recommends -y firefox-esr
-	apt purge -y firefox* && rm -vrf /home/*/.mozilla && rm -vrf /home/*/.cache/mozilla
-	install -d -m 0755 /etc/apt/keyrings
-	wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
-	gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc | awk '/pub/{getline; gsub(/^ +| +$/,""); if($0 == "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3") print "\nThe key fingerprint matches ("$0").\n"; else print "\nVerification failed: the fingerprint ("$0") does not match the expected one.\n"}'
-	cat <<EOF > /etc/apt/sources.list.d/mozilla.sources
+ 	cat <<"EOF" > /etc/apt/sources.list.d/mozilla.sources
+apt purge -y firefox* && rm -vrf /home/*/.mozilla && rm -vrf /home/*/.cache/mozilla
+install -d -m 0755 /etc/apt/keyrings
+wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
+gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc | awk '/pub/{getline; gsub(/^ +| +$/,""); if($0 == "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3") print "\nThe key fingerprint matches ("$0").\n"; else print "\nVerification failed: the fingerprint ("$0") does not match the expected one.\n"}'
+cat <<"EOF" > /etc/apt/sources.list.d/mozilla.sources
 Types: deb
 URIs: https://packages.mozilla.org/apt
 Suites: mozilla
 Components: main
-Architectures: $(dpkg --print-architecture)
+Architectures: amd64
 Signed-By: /etc/apt/keyrings/packages.mozilla.org.asc
 EOF
-	cat <<EOF > /etc/apt/preferences.d/mozilla
+cat <<"EOF" > /etc/apt/preferences.d/mozilla
 Package: *
 Pin: origin packages.mozilla.org
 Pin-Priority: 1000
 EOF
-	apt update && apt install -y firefox
- 
+apt update && apt install -y firefox
+EOF
+
 	### OLLAMA
 	curl -fsSL https://ollama.com/install.sh | sh
 	systemctl disable ollama
