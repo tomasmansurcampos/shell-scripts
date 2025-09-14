@@ -313,6 +313,31 @@ bind-interfaces
 cache-size=0
 EOF
 	systemctl restart dnsmasq.service
+
+	### BLOCKING ADS TRACKERS MALWARE SPYWARE TELEMETRY CRYPTOMINING BY HOSTS FILE DIRECTLY
+	cat <<"EOF" > /usr/bin/make-hosts-block-ads
+#!/bin/bash
+
+chattr -i /etc/hosts
+
+wget --inet4-only --https-only https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts -O /etc/hosts-steven-black
+wget --inet4-only --https-only https://someonewhocares.org/hosts/zero/hosts -O /etc/hosts-dan-pollock
+
+cat /etc/hosts > /etc/hosts-ad-blocker
+cat /etc/hosts-steven-black >> /etc/hosts-ad-blocker
+cat /etc/hosts-dan-pollock >> /etc/hosts-ad-blocker
+
+sed -i -e 's/web.facebook.com/0.0.0.0/g' /etc/hosts-ad-blocker
+sed -i -e 's/crash.steampowered.com/0.0.0.0/g' /etc/hosts-ad-blocker
+sed -i -e 's/click.discord.com/0.0.0.0/g' /etc/hosts-ad-blocker
+
+awk '!seen[$0]++' /etc/hosts-ad-blocker
+
+chattr +i /etc/hosts
+EOF
+
+	chmod +x /usr/bin/make-hosts-block-ads
+	bash /usr/bin/make-hosts-block-ads
 }
 
 _debian_desktop()
