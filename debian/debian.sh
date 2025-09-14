@@ -324,6 +324,8 @@ EOF
 URL1="https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts"
 URL2="https://someonewhocares.org/hosts/zero/hosts"
 
+rm -vrf /etc/hosts-filter*
+
 touch /etc/hosts-filter-steven-black-noipv6
 wget --inet4-only --https-only --show-progress --quiet "$URL1" -O /etc/hosts-filter-steven-black-noipv6
 if [ $? -eq 0 ]; then
@@ -343,16 +345,17 @@ else
     exit 1
 fi
 
-cat /etc/hosts > /etc/hosts-filter-adblocker
-cat /etc/hosts-filter-steven-black-noipv6 >> /etc/hosts-filter-adblocker-noipv6
+cat /etc/hosts-filter-steven-black-noipv6 > /etc/hosts-filter-adblocker-noipv6
 cat /etc/hosts-filter-dan-pollock-noipv6 >> /etc/hosts-filter-adblocker-noipv6
 
 sed -i -e 's/web.facebook.com/0.0.0.0/g' /etc/hosts-filter-adblocker-noipv6
 sed -i -e 's/crash.steampowered.com/0.0.0.0/g' /etc/hosts-filter-adblocker-noipv6
 sed -i -e 's/click.discord.com/0.0.0.0/g' /etc/hosts-filter-adblocker-noipv6
 
+awk '!seen[$0]++' /etc/hosts-filter-adblocker-noipv6 > /etc/hosts-filter-definitive
 chattr -i /etc/hosts
-awk '!seen[$0]++' /etc/hosts-filter-adblocker-noipv6 > /etc/hosts
+cp -v /etc/hosts.noipv6.bak /etc/hosts
+cat /etc/hosts-filter-definitive >> /etc/hosts
 
 rm -vrf /etc/hosts-filter*
 
