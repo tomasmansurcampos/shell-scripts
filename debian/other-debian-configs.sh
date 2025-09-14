@@ -21,7 +21,7 @@ Package: *
 Pin: origin packages.mozilla.org
 Pin-Priority: 1000
 EOF
-	apt update && apt install -y firefox
+	apt update && apt install --install-recommends -y firefox
 
 	### OLLAMA
 	curl -fsSL https://ollama.com/install.sh | sh
