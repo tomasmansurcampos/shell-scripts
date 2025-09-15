@@ -81,6 +81,9 @@ alias apt-clean='apt autoclean && apt clean && rm -vrf /var/lib/apt/lists/* && a
 EOF
 	source /root/.bashrc
 
+ 	cp -v /etc/nanorc /etc/nanorc.bak
+ 	echo "set linenumbers" >> /etc/nanorc
+
 	mkdir -v -p /opt/apps
 	mkdir -v -p /usr/share/bg-wp
 
