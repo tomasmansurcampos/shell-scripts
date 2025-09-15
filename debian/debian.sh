@@ -359,7 +359,7 @@ cat /etc/hosts-filter-definitive >> /etc/hosts
 
 rm -vrf /etc/hosts-filter*
 
-echo -e "\e[32m ✅ Archivo /etc/hosts bloqueando ads malware y mas con éxito !!! \e[0m"
+echo -e "\e[32m ✅ Archivo /etc/hosts bloqueando ads malware y más con éxito !!! \e[0m"
 EOF
 
 	chmod +x /usr/bin/make-hosts-block-ads
