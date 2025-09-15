@@ -323,9 +323,11 @@ EOF
 
 URL1="https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts"
 URL2="https://someonewhocares.org/hosts/zero/hosts"
+URL3="https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/hosts/tif-compressed.txt"
 
 rm -vrf /etc/hosts-filter*
 
+### STEVEN BLACK
 touch /etc/hosts-filter-steven-black-noipv6
 wget --inet4-only --https-only --show-progress --quiet "$URL1" -O /etc/hosts-filter-steven-black-noipv6
 if [ $? -eq 0 ]; then
@@ -335,6 +337,7 @@ else
     echo -e "\e[31m ❌ Error: Steven Black url hosts file not found. \e[0m"
     exit 1
 fi
+### DAN POLLOCK
 touch /etc/hosts-filter-dan-pollock-noipv6
 wget --inet4-only --https-only --show-progress --quiet "$URL2" -O /etc/hosts-filter-dan-pollock-noipv6
 if [ $? -eq 0 ]; then
@@ -344,9 +347,20 @@ else
     echo -e "\e[31m ❌ Error: Dan Pollock hosts file not found. \e[0m"
     exit 1
 fi
+### HAGEZI TIF
+touch /etc/hosts-filter-hagezi-tif-noipv6
+wget --inet4-only --https-only --show-progress --quiet "$URL3" -O /etc/hosts-filter-hagezi-tif-noipv6
+if [ $? -eq 0 ]; then
+    echo -e "\e[32m ✅ Hagezi TIF hosts file downloaded! \e[0m"
+    sed -i.bak '/::/d' /etc/hosts-filter-hagezi-tif-noipv6
+else
+    echo -e "\e[31m ❌ Error: Hagezi TIF hosts file not found. \e[0m"
+    exit 1
+fi
 
 cat /etc/hosts-filter-steven-black-noipv6 > /etc/hosts-filter-adblocker-noipv6
 cat /etc/hosts-filter-dan-pollock-noipv6 >> /etc/hosts-filter-adblocker-noipv6
+cat /etc/hosts-filter-hagezi-tif-noipv6 >> /etc/hosts-filter-adblocker-noipv6
 
 sed -i -e 's/web.facebook.com/0.0.0.0/g' /etc/hosts-filter-adblocker-noipv6
 sed -i -e 's/crash.steampowered.com/0.0.0.0/g' /etc/hosts-filter-adblocker-noipv6
