@@ -438,6 +438,27 @@ EOF
 	chmod +x /usr/bin/installer-google-chrome
 	bash /usr/bin/installer-google-chrome
 
+ 	### FIREFOX
+	#apt update && apt install --install-recommends -y firefox-esr
+	apt purge -y firefox* && rm -vrf /home/*/.mozilla && rm -vrf /home/*/.cache/mozilla
+	install -d -m 0755 /etc/apt/keyrings
+	wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
+	gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc | awk '/pub/{getline; gsub(/^ +| +$/,""); if($0 == "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3") print "\nThe key fingerprint matches ("$0").\n"; else print "\nVerification failed: the fingerprint ("$0") does not match the expected one.\n"}'
+	cat <<"EOF" > /etc/apt/sources.list.d/mozilla.sources
+Types: deb
+URIs: https://packages.mozilla.org/apt
+Suites: mozilla
+Components: main
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/packages.mozilla.org.asc
+EOF
+	cat <<"EOF" > /etc/apt/preferences.d/mozilla
+Package: *
+Pin: origin packages.mozilla.org
+Pin-Priority: 1000
+EOF
+	apt update && apt install --install-recommends -y firefox
+
  	### PACKET TRACER NO-NETWORK
 	cat <<"EOF" > /usr/share/applications/packet-tracer-no-network.desktop
 [Desktop Entry]
@@ -475,27 +496,6 @@ Architectures: $(dpkg --print-architecture)
 Signed-By: /usr/share/keyrings/microsoft.gpg
 EOF
 	apt update && apt install -y code
-
- 	### FFMPEG
-    cat <<"EOF" > /usr/bin/installer-ffmpeg-master
-#!/bin/bash
-URL="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz"
-if wget --inet4-only --https-only --quiet --spider "$URL"; then
-    rm -vrf /opt/apps/ffmpeg*
-    rm -vrf /usr/bin/master-ff*
-    wget --inet4-only --https-only --show-progress -q "$URL"
-    tar xf ffmpeg-master-latest-linux64-gpl.tar.xz
-    rm -vrf ffmpeg-master-latest-linux64-gpl.tar.xz
-    mv -v ffmpeg-master-latest-linux64-gpl /opt/apps
-    ln -vsf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffmpeg /usr/bin/master-ffmpeg
-    ln -vsf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffplay /usr/bin/master-ffplay
-    ln -vsf /opt/apps/ffmpeg-master-latest-linux64-gpl/bin/ffprobe /usr/bin/master-ffprobe
-else
-    echo "Error: The URL '$URL' is not available."
-fi
-EOF
-	chmod +x /usr/bin/installer-ffmpeg-master
-	bash /usr/bin/installer-ffmpeg-master
 }
 
 _cookie_fortune()
