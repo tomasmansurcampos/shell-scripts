@@ -1,18 +1,28 @@
 #!/bin/bash
-gnu_c_reference_()
-{
-  apt update
-  apt install -y git texinfo texlive
-  git clone https://git.savannah.gnu.org/git/c-intro-and-ref.git
-  cd c-intro-and-ref
-  mkdir c-manual
-  ln Makefile c.texi cpp.texi fp.texi fdl.texi c-manual
-  tar czf c-manual.tgz c-manual
-  cd c-manual
+set -e
+
+gnu_c_reference_() {
+  # 1. Instalar dependencias con privilegios de superusuario
+  sudo apt update
+  sudo apt install -y git texinfo texlive
+
+  # 2. Crear y acceder a un directorio temporal aislado
+  local WORK_DIR
+  WORK_DIR=$(mktemp -d)
+  
+  # 3. Registrar la limpieza automática al salir del script
+  trap 'rm -rf "$WORK_DIR"' EXIT
+  
+  cd "$WORK_DIR"
+
+  # 4. Clonar solo la versión más reciente del repositorio directamente en la carpeta actual
+  git clone --depth 1 https://git.savannah.gnu.org/git/c-intro-and-ref.git .
+
+  # 5. Compilar el archivo de origen al formato PDF
   texi2pdf c.texi
-  cp c.pdf $HOME
-  cd ../..
-  rm -rf c-intro-and-ref
-  cd $HOME
+
+  # 6. Copiar el PDF resultante al directorio del usuario
+  cp c.pdf "$HOME/c-manual.pdf"
 }
+
 gnu_c_reference_
