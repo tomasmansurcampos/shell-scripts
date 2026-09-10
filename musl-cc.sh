@@ -1,18 +1,25 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 musl_cc_()
 {
-	BASE_FOLDER_="~/musl-cc"
-	mkdir --parents $BASE_FOLDER_
-	curl -s musl.cc | grep cross | tee links
-	cd $BASE_FOLDER_
-	for $l_ in links:
-	do
-		if [[ $(wget -q --spider $l_) -eq "0" ]]; then
-			wget --https-only --inet4-only $l_
-	done
-	rm -rf links
-	cd ~
+    local BASE_FOLDER="${HOME}/musl-cc"
+    local BASE_URL="https://musl.cc"
+
+    mkdir -p "${BASE_FOLDER}"
+    cd "${BASE_FOLDER}"
+
+    # Filtrar directamente las URLs que contienen 'cross' y terminan en '.tgz'
+    local links
+    links=$(curl -sL "${BASE_URL}/" | grep 'cross.*\.tgz$')
+
+    # La variable links ya contiene las URLs completas
+    for target_url in ${links}; do
+        if wget -q --spider "${target_url}"; then
+            wget --https-only --inet4-only -c "${target_url}"
+        else
+            echo "Error: Enlace inaccesible -> ${target_url}" >&2
+        fi
+    done
 }
 
 musl_cc_
