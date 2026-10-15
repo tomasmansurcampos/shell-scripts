@@ -33,10 +33,14 @@ _yt_d() {
         exit 1
     fi
 
-    # 2. Verificación de dependencias
+    # 2. Limpieza de URL (Remover telemetría o parámetros adicionales)
+    # Elimina todo desde el primer '&' hasta el final de la cadena.
+    URL="${URL%%&*}"
+    echo "URL procesada: $URL"
+
+    # 3. Verificación de dependencias
     local DEPENDENCIAS=("yt-dlp" "ffmpeg" "deno")
     
-    # Agregar music-gold a las dependencias si se invoca la opción
     if [[ "$MUSIC_GOLD" -eq 1 ]]; then
         DEPENDENCIAS+=("music-gold.sh")
     fi
@@ -50,7 +54,7 @@ _yt_d() {
 
     echo "Dependencias correctas. Iniciando proceso..."
 
-    # 3. Determinar plantilla de salida según el tipo de enlace
+    # 4. Determinar plantilla de salida según el tipo de enlace
     local OUTPUT_TMPL=""
     if [[ "$URL" == *"list="* ]] || [[ "$URL" == *"playlist"* ]]; then
         echo "Modo: Álbum / Playlist"
@@ -60,7 +64,7 @@ _yt_d() {
         OUTPUT_TMPL="%(artist)s - Sencillos/%(title)s.%(ext)s"
     fi
 
-    # 4. Configurar argumentos base de yt-dlp usando un array de Bash
+    # 5. Configurar argumentos base de yt-dlp usando un array de Bash
     local YT_DLP_ARGS=(
         --cookies-from-browser chrome
         --extract-audio
@@ -71,23 +75,18 @@ _yt_d() {
         -o "$OUTPUT_TMPL"
     )
 
-    # 5. Si se activó -musicgold, inyectar el comando post-procesamiento
+    # 6. Si se activó -musicgold, inyectar el comando post-procesamiento
     if [[ "$MUSIC_GOLD" -eq 1 ]]; then
         echo "Modo Alquimia: Activado (-musicgold)"
-        # La directiva --exec de yt-dlp recibe el path completo del archivo descargado ({}).
-        # Esto invoca un subshell de bash que:
-        # a) Entra al directorio del archivo (ej. 'Artista - Album/')
-        # b) Ejecuta music-gold.sh sobre el nombre del archivo.
-        # c) Borra el FLAC original, dejando solo la carpeta G33.
         YT_DLP_ARGS+=(
             --exec "bash -c 'cd \"\$(dirname \"\$1\")\" && music-gold.sh \"\$(basename \"\$1\")\" && rm -f \"\$(basename \"\$1\")\"' _ {}"
         )
     fi
 
-    # 6. Ejecutar herramienta
+    # 7. Ejecutar herramienta
     yt-dlp "${YT_DLP_ARGS[@]}" "$URL"
 
-    # 7. Mensaje final
+    # 8. Mensaje final
     echo "Descarga y procesamiento finalizados con éxito."
 }
 
