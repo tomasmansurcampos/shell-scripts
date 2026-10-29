@@ -21,7 +21,7 @@ conexion_existe() {
     nmcli connection show "$NOMBRE_CONN" > /dev/null 2>&1
 }
 
-# Función para instalar (importar y quitar autoconnect)
+# Función para instalar (importar, quitar autoconnect y desconectar)
 instalar_vpn() {
     if ! conexion_existe; then
         if [ ! -f "$ARCHIVO" ]; then
@@ -33,6 +33,9 @@ instalar_vpn() {
         
         echo "Desactivando inicio automático para '$NOMBRE_CONN'..."
         sudo nmcli connection modify "$NOMBRE_CONN" connection.autoconnect no
+
+        echo "Desconectando la interfaz para dejarla en estado inactivo..."
+        sudo nmcli connection down "$NOMBRE_CONN" > /dev/null 2>&1
     else
         echo "El perfil '$NOMBRE_CONN' ya está instalado en NetworkManager."
     fi
