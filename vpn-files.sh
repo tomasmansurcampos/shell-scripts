@@ -2,10 +2,10 @@
 
 # Verificar cantidad de argumentos
 if [ "$#" -eq 0 ] || [ "$#" -gt 2 ]; then
-    echo "Uso: $0 [OPCION] [ARCHIVO.conf | NOMBRE_CONEXION]"
+    echo "Uso: $0 [OPCION] [ARCHIVO.conf/.ovpn | NOMBRE_CONEXION]"
     echo "Opciones:"
     echo "  --instalar    Importa la VPN y desactiva el inicio automático."
-    echo "  --conectar    Importa, conecta y aplica kill switch."
+    echo "  --conectar    Importa, conecta y aplica kill switch dinámico."
     echo "  --desconectar Desconecta la VPN (o todas si no se especifica), limpia firewall y reinicia red."
     echo "  --borrar      Elimina la VPN de NetworkManager y reinicia servicios."
     exit 1
@@ -13,8 +13,26 @@ fi
 
 ACCION=$1
 ARCHIVO=$2
-# Extraer el nombre de la conexión (sin la ruta y sin la extensión .conf)
-NOMBRE_CONN=$(basename "$ARCHIVO" .conf)
+
+# Validar argumento y extraer nombre base eliminando extensiones .conf o .ovpn
+if [ -n "$ARCHIVO" ]; then
+    NOMBRE_CONN=$(basename "$ARCHIVO" | sed -E 's/\.(conf|ovpn)$//')
+elif [ "$ACCION" != "--desconectar" ]; then
+    echo "Error: La opción $ACCION requiere especificar un archivo o nombre de conexión."
+    exit 1
+fi
+
+# Función para determinar si el archivo es WireGuard u OpenVPN
+detectar_tipo_vpn() {
+    local config_file="$1"
+    if grep -qiE "^\[Interface\]" "$config_file" && grep -qiE "^\[Peer\]" "$config_file"; then
+        echo "wireguard"
+    elif grep -qiE "^client" "$config_file" || grep -qiE "^dev tun" "$config_file"; then
+        echo "openvpn"
+    else
+        echo "desconocido"
+    fi
+}
 
 # Función para comprobar si la conexión ya está en NetworkManager
 conexion_existe() {
@@ -28,8 +46,15 @@ instalar_vpn() {
             echo "Error: El archivo '$ARCHIVO' no existe en este directorio."
             exit 1
         fi
-        echo "Importando '$ARCHIVO' a NetworkManager..."
-        sudo nmcli connection import type wireguard file "$ARCHIVO"
+        
+        TIPO_VPN=$(detectar_tipo_vpn "$ARCHIVO")
+        if [ "$TIPO_VPN" = "desconocido" ]; then
+            echo "Error: No se pudo determinar el formato del archivo (WireGuard u OpenVPN)."
+            exit 1
+        fi
+
+        echo "Importando '$ARCHIVO' como tipo $TIPO_VPN a NetworkManager..."
+        sudo nmcli connection import type "$TIPO_VPN" file "$ARCHIVO"
         
         echo "Desactivando inicio automático para '$NOMBRE_CONN'..."
         sudo nmcli connection modify "$NOMBRE_CONN" connection.autoconnect no
@@ -44,61 +69,76 @@ instalar_vpn() {
 # Función para reiniciar servicios críticos tras cambios en el ruteo
 reiniciar_servicios_red() {
     echo "Aplicando medidas de privacidad (DNS, NTP y limpieza de sockets)..."
-    
-    # Reiniciar DNSCrypt para recalcular servidores DNS por latencia
     sudo systemctl restart dnscrypt-proxy.service dnscrypt-proxy.socket
-
-    # Reiniciar NTP para resolver pool de hora desde la nueva IP de salida
     sudo systemctl restart systemd-timesyncd.service
-
-    # Vaciar la tabla de seguimiento de conexiones del kernel (evita fugas de sockets previos)
     if command -v conntrack >/dev/null 2>&1; then
         sudo conntrack -F >/dev/null 2>&1
     fi
 }
 
-# Aplica reglas nftables para el endpoint del archivo activo
+# Aplica reglas nftables dinámicas evaluando protocolo y remotes
 activar_killswitch() {
     local config_file="$1"
     if [ -f "$config_file" ]; then
-        # Extraer IP y puerto del Endpoint del archivo .conf
-        local endpoint=$(grep -iE "^Endpoint" "$config_file" | awk -F'=' '{print $2}' | tr -d ' ')
-        local ip=$(echo "$endpoint" | cut -d':' -f1)
-        local puerto=$(echo "$endpoint" | cut -d':' -f2)
+        TIPO_VPN=$(detectar_tipo_vpn "$config_file")
+        REGLAS_ENDPOINT=""
 
-        if [ -n "$ip" ] && [ -n "$puerto" ]; then
-            echo "Aplicando Kill-Switch nftables para Endpoint $ip:$puerto..."
+        if [ "$TIPO_VPN" = "wireguard" ]; then
+            IFACE="wg*"
+            PROTO="udp"
+            local endpoint=$(grep -iE "^Endpoint" "$config_file" | awk -F'=' '{print $2}' | tr -d ' ')
+            local ip=$(echo "$endpoint" | cut -d':' -f1)
+            local puerto=$(echo "$endpoint" | cut -d':' -f2)
+            REGLAS_ENDPOINT="        ip daddr $ip udp dport $puerto accept"
+
+        elif [ "$TIPO_VPN" = "openvpn" ]; then
+            IFACE="tun*"
             
-            # Inyectar reglas directamente usando heredoc para evitar problemas de escape
+            # Detectar protocolo (tcp o udp) ignorando mayúsculas
+            PROTO=$(grep -iE "^proto " "$config_file" | awk '{print $2}' | tr -d ' ' | tr '[:upper:]' '[:lower:]')
+            [ -z "$PROTO" ] && PROTO="udp" # Fallback por defecto en OpenVPN
+
+            # Procesar todos los remotes (ej. ProtonVPN declara múltiples puertos)
+            while read -r line; do
+                [ -z "$line" ] && continue
+                local ip_remote=$(echo "$line" | awk '{print $2}')
+                local puerto_remote=$(echo "$line" | awk '{print $3}')
+                [ -z "$puerto_remote" ] && puerto_remote="1194"
+                REGLAS_ENDPOINT+="        ip daddr $ip_remote $PROTO dport $puerto_remote accept"$'\n'
+            done <<< "$(grep -iE "^remote " "$config_file")"
+        fi
+
+        if [ -n "$REGLAS_ENDPOINT" ]; then
+            echo "Aplicando Kill-Switch nftables para $TIPO_VPN ($PROTO) sobre interfaz $IFACE..."
+            
             sudo nft -f - <<EOF
-            flush ruleset
-            table inet killswitch {
-                chain input {
-                    type filter hook input priority 0; policy drop;
-                    iifname "lo" accept
-                    iifname "wg*" accept
-                    ct state established,related accept
-                }
-                chain forward {
-                    type filter hook forward priority 0; policy drop;
-                }
-                chain output {
-                    type filter hook output priority 0; policy drop;
-                    oifname "lo" accept
-                    oifname "wg*" accept
-                    ip daddr $ip udp dport $puerto accept
-                    ip daddr 192.168.100.0/24 accept
-                }
-            }
+flush ruleset
+table inet killswitch {
+    chain input {
+        type filter hook input priority 0; policy drop;
+        iifname "lo" accept
+        iifname "$IFACE" accept
+        ct state established,related accept
+    }
+    chain forward {
+        type filter hook forward priority 0; policy drop;
+    }
+    chain output {
+        type filter hook output priority 0; policy drop;
+        oifname "lo" accept
+        oifname "$IFACE" accept
+$REGLAS_ENDPOINT
+        ip daddr 192.168.100.0/24 accept
+    }
+}
 EOF
         else
-             echo "Error: No se pudo extraer la IP o puerto del endpoint."
-             exit 1
+            echo "Error: No se pudo extraer la IP o puerto del archivo de configuración."
+            exit 1
         fi
     fi
 }
 
-# Desactiva el killswitch y restaura salida normal al desconectar
 desactivar_killswitch() {
     echo "Limpiando reglas de killswitch..."
     sudo nft flush ruleset
@@ -121,13 +161,11 @@ case $ACCION in
     --desconectar)
         if [ -z "$ARCHIVO" ]; then
             echo "Buscando conexiones activas ajenas a Wi-Fi/Ethernet..."
-            # Extraer conexiones activas filtrando las de tipo loopback, wifi o ethernet
             CONEXIONES_AJENAS=$(nmcli -t -f NAME,TYPE connection show --active | awk -F: '$2 !~ /802-11-wireless|802-3-ethernet|ethernet|wifi|loopback/ {print $1}')
             
             if [ -z "$CONEXIONES_AJENAS" ]; then
-                echo "No se detectaron conexiones VPN/WireGuard activas."
+                echo "No se detectaron conexiones VPN activas."
             else
-                # Iterar y desconectar cada conexión detectada
                 while IFS= read -r conn; do
                     echo "Desconectando interfaz: $conn"
                     sudo nmcli connection down "$conn" 2>/dev/null
