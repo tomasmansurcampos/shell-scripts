@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Verificar cantidad de argumentos
-if [ "$#" -ne 2 ]; then
+if [ "$#" -eq 0 ] || [ "$#" -gt 2 ]; then
     echo "Uso: $0 [OPCION] [ARCHIVO.conf | NOMBRE_CONEXION]"
     echo "Opciones:"
     echo "  --instalar    Importa la VPN y desactiva el inicio automático."
-    echo "  --conectar    Importa, conecta y reinicia DNS/NTP/Conntrack."
-    echo "  --desconectar Desconecta la VPN y reinicia DNS/NTP/Conntrack."
+    echo "  --conectar    Importa, conecta y aplica kill switch."
+    echo "  --desconectar Desconecta la VPN (o todas si no se especifica), limpia firewall y reinicia red."
     echo "  --borrar      Elimina la VPN de NetworkManager y reinicia servicios."
     exit 1
 fi
