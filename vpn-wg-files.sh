@@ -119,11 +119,28 @@ case $ACCION in
         ;;
         
     --desconectar)
-        echo "Desconectando la VPN '$NOMBRE_CONN'..."
-        sudo nmcli connection down "$NOMBRE_CONN"
+        if [ -z "$ARCHIVO" ]; then
+            echo "Buscando conexiones activas ajenas a Wi-Fi/Ethernet..."
+            # Extraer conexiones activas filtrando las de tipo loopback, wifi o ethernet
+            CONEXIONES_AJENAS=$(nmcli -t -f NAME,TYPE connection show --active | awk -F: '$2 !~ /802-11-wireless|802-3-ethernet|ethernet|wifi|loopback/ {print $1}')
+            
+            if [ -z "$CONEXIONES_AJENAS" ]; then
+                echo "No se detectaron conexiones VPN/WireGuard activas."
+            else
+                # Iterar y desconectar cada conexión detectada
+                while IFS= read -r conn; do
+                    echo "Desconectando interfaz: $conn"
+                    sudo nmcli connection down "$conn" 2>/dev/null
+                done <<< "$CONEXIONES_AJENAS"
+            fi
+        else
+            echo "Desconectando la VPN '$NOMBRE_CONN'..."
+            sudo nmcli connection down "$NOMBRE_CONN" 2>/dev/null
+        fi
+
         desactivar_killswitch
         reiniciar_servicios_red
-        echo "Desconectado exitosamente."
+        echo "Red domiciliaria restaurada exitosamente."
         ;;
         
     --borrar)
