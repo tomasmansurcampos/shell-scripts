@@ -54,7 +54,13 @@ instalar_vpn() {
         fi
 
         echo "Importando '$ARCHIVO' como tipo $TIPO_VPN a NetworkManager..."
-        sudo nmcli connection import type "$TIPO_VPN" file "$ARCHIVO"
+        
+        # Validación de error estricta en la importación
+        if ! sudo nmcli connection import type "$TIPO_VPN" file "$ARCHIVO"; then
+            echo "Error crítico: NetworkManager rechazó la importación."
+            echo "Asegúrate de ejecutar: sudo apt install network-manager-openvpn && sudo systemctl restart NetworkManager"
+            exit 1
+        fi
         
         echo "Desactivando inicio automático para '$NOMBRE_CONN'..."
         sudo nmcli connection modify "$NOMBRE_CONN" connection.autoconnect no
@@ -98,7 +104,7 @@ activar_killswitch() {
             PROTO=$(grep -iE "^proto " "$config_file" | awk '{print $2}' | tr -d ' ' | tr '[:upper:]' '[:lower:]')
             [ -z "$PROTO" ] && PROTO="udp" # Fallback por defecto en OpenVPN
 
-            # Procesar todos los remotes (ej. ProtonVPN declara múltiples puertos)
+            # Procesar todos los remotes
             while read -r line; do
                 [ -z "$line" ] && continue
                 local ip_remote=$(echo "$line" | awk '{print $2}')
@@ -152,7 +158,13 @@ case $ACCION in
     --conectar)
         instalar_vpn
         echo "Conectando a la VPN '$NOMBRE_CONN'..."
-        sudo nmcli connection up "$NOMBRE_CONN"
+        
+        # Validación estricta para levantar la conexión
+        if ! sudo nmcli connection up "$NOMBRE_CONN"; then
+            echo "Error crítico: No se pudo establecer la conexión VPN."
+            exit 1
+        fi
+        
         activar_killswitch "$ARCHIVO"
         reiniciar_servicios_red
         echo "Conectado exitosamente."
