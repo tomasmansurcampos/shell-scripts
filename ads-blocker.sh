@@ -4,17 +4,20 @@ set -euo pipefail
 ads_blocker()
 {
     local HOSTS_FILE="/etc/hosts"
+    local DNSCRYPT_FILE="/etc/hosts.dnscrypt.proxy"
     local ORIGINAL_BACKUP="/etc/hosts.original"
     local TEMP_BLOCK
     local TEMP_CLEAN
     local TEMP_FINAL
+    local TEMP_DNSCRYPT
 
     TEMP_BLOCK=$(mktemp)
     TEMP_CLEAN=$(mktemp)
     TEMP_FINAL=$(mktemp)
+    TEMP_DNSCRYPT=$(mktemp)
 
     # TRAP: Limpieza automática de todos los archivos temporales
-    trap "rm -f \"$TEMP_BLOCK\" \"$TEMP_CLEAN\" \"$TEMP_FINAL\"" EXIT
+    trap "rm -f \"$TEMP_BLOCK\" \"$TEMP_CLEAN\" \"$TEMP_FINAL\" \"$TEMP_DNSCRYPT\"" EXIT
 
     local URLS=(
         "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists-legacy@latest/hosts/light-compressed.txt"
@@ -52,6 +55,10 @@ ads_blocker()
         exit 1
     fi
 
+    echo "Extrayendo dominios para dnscrypt-proxy..."
+    # Imprime únicamente la segunda columna (dominios) para usar en blocked_names
+    awk '{print $2}' "$TEMP_CLEAN" > "$TEMP_DNSCRYPT"
+
     # Preservar una única copia inmutable del hosts de instalación
     if [[ ! -f "$ORIGINAL_BACKUP" ]]; then
         echo "Creando backup base en $ORIGINAL_BACKUP..."
@@ -69,7 +76,10 @@ ads_blocker()
     sudo cp "$TEMP_FINAL" "$HOSTS_FILE"
     sudo chmod 644 "$HOSTS_FILE"
 
-    echo "Archivo hosts actualizado y optimizado correctamente."
+    sudo cp "$TEMP_DNSCRYPT" "$DNSCRYPT_FILE"
+    sudo chmod 644 "$DNSCRYPT_FILE"
+
+    echo "Archivo hosts y lista para dnscrypt-proxy actualizados correctamente."
 }
 
 ads_blocker
