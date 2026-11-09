@@ -4,6 +4,7 @@ set -euo pipefail
 ads_blocker()
 {
     local HOSTS_FILE="/etc/hosts"
+    local HOSTS_FILE2="/etc/hosts.antiads"
     local DNSCRYPT_FILE="/etc/hosts.dnscrypt.proxy"
     local ORIGINAL_BACKUP="/etc/hosts.original"
     local TEMP_BLOCK
@@ -74,7 +75,9 @@ ads_blocker()
     echo "Aplicando actualización de manera atómica..."
     # Uso correcto de sudo para sobrescribir archivos del sistema
     sudo cp "$TEMP_FINAL" "$HOSTS_FILE"
+    sudo cp "$TEMP_FINAL" "$HOSTS_FILE2"
     sudo chmod 644 "$HOSTS_FILE"
+    sudo chmod 644 "$HOSTS_FILE2"
 
     sudo cp "$TEMP_DNSCRYPT" "$DNSCRYPT_FILE"
     sudo chmod 644 "$DNSCRYPT_FILE"
