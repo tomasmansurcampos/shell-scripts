@@ -4,9 +4,8 @@
 set -Eeuo pipefail
 
 # ============================================================
-# SANEAR-AUDIO-3
+# SANEAR-AUDIO
 # Normalización y conversión de audio lossless a FLAC.
-# Compatible con Debian 13.
 # ============================================================
 
 readonly OUT_DIR_NAME="flac-sanos"
