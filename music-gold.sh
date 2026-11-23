@@ -1,5 +1,11 @@
 #!/bin/bash
 
+set -Eeuo pipefail
+
+# Script que transforma C5 = 523,251 Hz en C5 = 528 Hz. Es decir, consigue una afinación equivalente aproximadamente a A4 = 444 Hz.
+# Se modifica simultáneamente el pitch y el tempo, generando asi una muy sutil subida de velocidad y BPM.
+
+
 # ==========================================
 # CHEQUEO DE DEPENDENCIAS
 # ==========================================
