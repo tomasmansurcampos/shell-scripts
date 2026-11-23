@@ -68,6 +68,11 @@ SOX_ng_GLOBAL_SETTINGS="--single-threaded -V6 -S" # --multi-threaded --buffer 13
 GAIN_STAGE="gain -h"
 
 ### --- Remuestreo de alta calidad a 48 kHz: precisión de cálculo, fase lineal y parámetros de filtrado ---
+# ~$ sox_ng --version
+# sox_ng:      SoX_ng v14.9.0
+# ~$ sox_ng --help-effect rate
+# -n                     Disable small integer optimizations
+# -t                     Increase irrational ratio accuracy
 RATE_EFFECT_48="rate -u -n -t -p 50 -b 95 48k"
 
 ### --- Normalización final a -1.0 dBFS (Sample Peak): reserva de 1 dB de margen respecto de 0 dBFS. No garantiza un límite de True Peak ni la ausencia de ISP ---
