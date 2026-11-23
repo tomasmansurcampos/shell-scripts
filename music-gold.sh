@@ -61,8 +61,8 @@ RAW_FORMAT="-t raw -b 32 -e floating-point -c 2"
 ### --- Formato de exportación WAV: PCM estéreo de 24 bits enteros a 48 kHz ---
 WAV_FORMAT_48="-t wav -b 24 -e signed-integer -r 48000 -c 2"
 
-### --- Configuración global de SOX_ng: ejecución monohilo, máxima verbosidad y visualización del progreso ---
-SOX_ng_GLOBAL_SETTINGS="--single-threaded -V6 -S" # --multi-threaded --buffer 131072 -V6 -S
+### --- Configuración global de SOX_ng: ejecución monohilo, verbosidad (1: failure messages 2: warnings 3: details of processing 4-6: increasing levels of debug messages) y visualización del progreso ---
+SOX_ng_GLOBAL_SETTINGS="--single-threaded -V1 -S" # --multi-threaded --buffer 131072 -V6 -S
 
 ### --- Gestión automática del headroom mediante la reserva de margen de ganancia antes del procesamiento DSP ---
 GAIN_STAGE="gain -h"
