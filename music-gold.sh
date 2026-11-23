@@ -137,16 +137,85 @@ limpieza_inicial()
 reafinacion_y_resampleo_absoluto()
 {
     echo -e "\n\e[45m 🙏 Iniciando Reafinación y Resampleo Máster 🙏...\e[0m"
-    
-    local SR_ORIGINAL=$(soxi_ng -r "$ARCHIVO")
+
+    local SR_ORIGINAL
+    local N_CHANNELS
+    local DYNAMIC_MAGIC_TRICK
+
+    # Detectar sample rate original.
+    SR_ORIGINAL=$(soxi_ng -r "$ARCHIVO") || {
+        echo -e "\e[31m ❌ No se pudo detectar el Sample Rate.\e[0m"
+        return 1
+    }
+
+    # Detectar cantidad de canales del primer stream de audio.
+    N_CHANNELS=$(ffprobe -v error \
+        -select_streams a:0 \
+        -show_entries stream=channels \
+        -of default=noprint_wrappers=1:nokey=1 \
+        "$ARCHIVO") || {
+        echo -e "\e[31m ❌ No se pudo detectar la cantidad de canales.\e[0m"
+        return 1
+    }
+
+    # Validar que sea un número entero positivo.
+    N_CHANNELS=${N_CHANNELS//$'\r'/}
+
+    if [[ ! "$N_CHANNELS" =~ ^[1-9][0-9]*$ ]]; then
+        echo -e "\e[31m ❌ Cantidad de canales inválida: '$N_CHANNELS'\e[0m"
+        return 1
+    fi
+
+    # FLAC admite como máximo 8 canales.
+    if (( N_CHANNELS > 8 )); then
+        echo -e "\e[31m ❌ FLAC no admite más de 8 canales. Detectados: $N_CHANNELS\e[0m"
+        return 1
+    fi
+
+    # Calcular factor de reafinación.
+    DYNAMIC_MAGIC_TRICK=$(echo "scale=15; ($SR_ORIGINAL * 528) / $C5" | bc) || {
+        echo -e "\e[31m ❌ Error calculando el factor de reafinación.\e[0m"
+        return 1
+    }
+
+    # ==========================================
+    # FORMATOS DINÁMICOS SEGÚN EL AUDIO ORIGINAL
+    # ==========================================
+
+    # RAW intermedio: Float32, canales originales y sample rate original.
+    local -a RAW_FORMAT=(
+        -t raw
+        -b 32
+        -e floating-point
+        -r "$SR_ORIGINAL"
+        -c "$N_CHANNELS"
+    )
+
+    # Lectura RAW: Float32, canales originales y frecuencia modificada.
+    local -a DYNAMIC_RAW_TRICK=(
+        -t raw
+        -b 32
+        -e floating-point
+        -r "$DYNAMIC_MAGIC_TRICK"
+        -c "$N_CHANNELS"
+    )
+
+    # WAV final: PCM 24-bit, 48 kHz y canales originales.
+    local -a WAV_FORMAT_48=(
+        -t wav
+        -b 24
+        -e signed-integer
+        -r 48000
+        -c "$N_CHANNELS"
+    )
 
     echo -e "\n\e[1;34m=========================================================\e[0m"
-    echo -e "\e[1;36m 🎵 PROCESANDO: $ARCHIVO (Sample Rate: ${SR_ORIGINAL}Hz) 🎵\e[0m"
+    echo -e "\e[1;36m 🎵 PROCESANDO: $ARCHIVO \e[0m"
+    echo -e "\e[36m Sample Rate Original: ${SR_ORIGINAL} Hz\e[0m"
+    echo -e "\e[36m Canales Detectados: ${N_CHANNELS}\e[0m"
+    echo -e "\e[36m Frecuencia Modificada: ${DYNAMIC_MAGIC_TRICK} Hz\e[0m"
     echo -e "\e[1;34m=========================================================\e[0m"
-    
-    local DYNAMIC_MAGIC_TRICK=$(echo "scale=15; ($SR_ORIGINAL * 528) / $C5" | bc)
-    local DYNAMIC_RAW_TRICK="-t raw -b 32 -e floating-point -c 2 -r $DYNAMIC_MAGIC_TRICK"
-    
+	
     echo -e "\e[36m ℹ️ Sample Rate Original: ${SR_ORIGINAL}Hz -> Frecuencia Mágica: ${DYNAMIC_MAGIC_TRICK}Hz \e[0m"
     
     # ==========================================
