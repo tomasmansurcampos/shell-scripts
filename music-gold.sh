@@ -246,17 +246,24 @@ reafinacion_y_resampleo_absoluto()
 
 		# Etapa 1: decode + float raw
 		echo -e "\e[36m [1/2] Generando RAW intermedio...\e[0m"
-		sox_ng $SOX_ng_GLOBAL_SETTINGS "$ARCHIVO" $RAW_FORMAT "$TEMP_RAW" \
-		    || { error_salida; return 1; }
+		sox_ng $SOX_ng_GLOBAL_SETTINGS \
+    "$ARCHIVO" \
+    "${RAW_FORMAT[@]}" \
+    "$TEMP_RAW" \
+    || { error_salida; return 1; }
 
 		# Etapa 2: DSP + resample + export
 		echo -e "\e[36m [2/2] Procesando RAW → WAV final...\e[0m"
-		sox_ng $SOX_ng_GLOBAL_SETTINGS $DYNAMIC_RAW_TRICK "$TEMP_RAW" $WAV_FORMAT_48 "$TEMP_WAV" \
-		    $GAIN_STAGE \
-		    $RATE_EFFECT_48 \
-		    $FINAL_NORM \
-		    $DITHERING \
-		    || { error_salida; return 1; }
+		sox_ng $SOX_ng_GLOBAL_SETTINGS \
+    "${DYNAMIC_RAW_TRICK[@]}" \
+    "$TEMP_RAW" \
+    "${WAV_FORMAT_48[@]}" \
+    "$TEMP_WAV" \
+    $GAIN_STAGE \
+    $RATE_EFFECT_48 \
+    $FINAL_NORM \
+    $DITHERING \
+    || { error_salida; return 1; }
 
 		# Limpieza RAW intermedio
 		rm -vf "$TEMP_RAW"
@@ -267,13 +274,20 @@ reafinacion_y_resampleo_absoluto()
         date -u >> sox_ng_stage1.log
         date -u >> sox_ng_stage2.log
 
-		sox_ng $SOX_ng_GLOBAL_SETTINGS "$ARCHIVO" $RAW_FORMAT - 2>>sox_ng_stage1.log | \
-		sox_ng $SOX_ng_GLOBAL_SETTINGS $DYNAMIC_RAW_TRICK - $WAV_FORMAT_48 "$TEMP_WAV" \
-		    $GAIN_STAGE \
-		    $RATE_EFFECT_48 \
-		    $FINAL_NORM \
-		    $DITHERING \
-		    2>>sox_ng_stage2.log || { error_salida; return 1; }
+		sox_ng $SOX_ng_GLOBAL_SETTINGS \
+    "$ARCHIVO" \
+    "${RAW_FORMAT[@]}" \
+    - 2>>sox_ng_stage1.log | \
+sox_ng $SOX_ng_GLOBAL_SETTINGS \
+    "${DYNAMIC_RAW_TRICK[@]}" \
+    - \
+    "${WAV_FORMAT_48[@]}" \
+    "$TEMP_WAV" \
+    $GAIN_STAGE \
+    $RATE_EFFECT_48 \
+    $FINAL_NORM \
+    $DITHERING \
+    2>>sox_ng_stage2.log || { error_salida; return 1; }
 	fi
 
     echo -e "\n\e[45m ✅✅✅ Reafinacion musical realizada exitosamente ... ✅✅✅ \e[0m"
