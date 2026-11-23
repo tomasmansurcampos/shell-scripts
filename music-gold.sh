@@ -65,7 +65,7 @@ GAIN_STAGE="gain -h"
 RATE_EFFECT_48="rate -u -n -t -p 50 -b 95 48k"
 
 ### --- norm final, en -0.2 dBFS es casi imposible generar ISP para cualquier DAC ---
-FINAL_NORM="norm -0.01"
+FINAL_NORM="norm -0.2"
 
 ### --- dither shibata A1 para 24 bits ---
 DITHERING="dither -f shibata-A1 -p 24"
