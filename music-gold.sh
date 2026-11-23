@@ -49,25 +49,25 @@ chequear_dependencias
 
 C5=523.25113060119726935569998704660940
 
-### --- formato raw que sox_ng usa internamente ---
+### --- Formato de audio RAW intermedio: PCM estéreo de 32 bits en punto flotante ---
 RAW_FORMAT="-t raw -b 32 -e floating-point -c 2"
 
-### --- formato wav de alta resolucion para la exportacion final de sox_ng ---
+### --- Formato de exportación WAV: PCM estéreo de 24 bits enteros a 48 kHz ---
 WAV_FORMAT_48="-t wav -b 24 -e signed-integer -r 48000 -c 2"
 
-### --- opciones de sox_ng para mostrar detalles del proceso ---
+### --- Configuración global de SOX_ng: ejecución monohilo, máxima verbosidad y visualización del progreso ---
 SOX_ng_GLOBAL_SETTINGS="--single-threaded -V6 -S" # --multi-threaded --buffer 131072 -V6 -S
 
-### --- headroom real para evitar intersample peaks durante el efecto rate ---
+### --- Gestión automática del headroom mediante la reserva de margen de ganancia antes del procesamiento DSP ---
 GAIN_STAGE="gain -h"
 
-### --- efecto rate y las mejores opciones posibles fieles a la onda original de sonido ---
+### --- Remuestreo de alta calidad a 48 kHz: precisión de cálculo, fase lineal y parámetros de filtrado ---
 RATE_EFFECT_48="rate -u -n -t -p 50 -b 95 48k"
 
-### --- normalización final a -1.0 dBFS de pico de muestra para conservar 1 dB de margen digital ---
+### --- Normalización final a -1.0 dBFS (Sample Peak): reserva de 1 dB de margen respecto de 0 dBFS. No garantiza un límite de True Peak ni la ausencia de ISP ---
 FINAL_NORM="norm -1.0"
 
-### --- dither shibata A1 para 24 bits ---
+### --- Dithering Shibata de alta calidad para la cuantización final a PCM de 24 bits ---
 DITHERING="dither -f shibata-A1 -p 24"
 
 echo -e "\e[32m✅ Se hará alquimia musical con Fase Lineal. \e[0m\n"
