@@ -64,8 +64,8 @@ GAIN_STAGE="gain -h"
 ### --- efecto rate y las mejores opciones posibles fieles a la onda original de sonido ---
 RATE_EFFECT_48="rate -u -n -t -p 50 -b 95 48k"
 
-### --- norm final, en -0.2 dBFS es casi imposible generar ISP para cualquier DAC ---
-FINAL_NORM="norm -0.2"
+### --- normalización final a -1.0 dBFS de pico de muestra para conservar 1 dB de margen digital ---
+FINAL_NORM="norm -1.0"
 
 ### --- dither shibata A1 para 24 bits ---
 DITHERING="dither -f shibata-A1 -p 24"
